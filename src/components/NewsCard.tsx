@@ -96,7 +96,7 @@ export function NewsCard({ article, index = 0 }: Props) {
         <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800 mt-auto">
           <div className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500">
             <Clock size={11} />
-            <span>{timeAgo(article.published_at)}</span>
+            <span suppressHydrationWarning>{timeAgo(article.published_at)}</span>
           </div>
           <a
             href={article.link}

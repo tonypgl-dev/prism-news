@@ -183,7 +183,7 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
             <div className="flex items-center justify-between mt-auto pt-1 flex-wrap gap-2">
               <div className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500">
                 <Clock size={10} />
-                <span>{timeAgo(article.published_at)}</span>
+                <span suppressHydrationWarning>{timeAgo(article.published_at)}</span>
                 {isCardExpandable && (
                   <span className="ml-1.5 text-[10px] text-purple-500 dark:text-purple-400 font-semibold">
                     {isExpanded ? "▲ Restrânge" : "▼ Sinteză AI"}
