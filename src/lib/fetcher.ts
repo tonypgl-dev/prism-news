@@ -50,7 +50,6 @@ const parser = new RSSParser({
   customFields: {
     item: [["media:content", "media:content", { keepArray: false }]],
   },
-  xml2js: { strict: false, normalizeTags: false },
 });
 
 // ----------------------------------------------------------------
@@ -208,21 +207,18 @@ async function processFeed(
 
   if (!rawArticles.length) return { inserted: 0, skipped: 0, errors: 0, aiGenerated: 0, newArticles: [] };
 
-  // Generare AI pentru primele 5 articole din batch (cost control)
+  // Generare AI pentru primele 3 articole din batch — secvențial (evită rate limit)
   let aiGenerated = 0;
   if (anthropic) {
-    const AI_LIMIT = 5;
-    const toEnrich = rawArticles.slice(0, AI_LIMIT).filter((a) => a.original_snippet);
-    await Promise.all(
-      toEnrich.map(async (article) => {
-        const result = await generateAiSummaries(anthropic, article.title, article.original_snippet!);
-        if (result) {
-          article.ai_pre_summary = result.ai_pre_summary;
-          article.ai_summary = result.ai_summary;
-          aiGenerated++;
-        }
-      })
-    );
+    const AI_LIMIT = 3;
+    for (const article of rawArticles.slice(0, AI_LIMIT).filter((a) => a.original_snippet)) {
+      const result = await generateAiSummaries(anthropic, article.title, article.original_snippet!);
+      if (result) {
+        article.ai_pre_summary = result.ai_pre_summary;
+        article.ai_summary = result.ai_summary;
+        aiGenerated++;
+      }
+    }
   }
 
   const { data, error } = await supabase
@@ -243,6 +239,53 @@ async function processFeed(
     aiGenerated,
     newArticles,
   };
+}
+
+// ----------------------------------------------------------------
+// Pas 3: AI prioritar pentru articole clusterate
+// ----------------------------------------------------------------
+
+async function generateAiForClustered(
+  supabase: SupabaseClient,
+  anthropic: Anthropic,
+  newArticleIds: string[]
+): Promise<number> {
+  if (!newArticleIds.length) return 0;
+
+  const { data: candidates, error } = await supabase
+    .from("articles")
+    .select("id, title, original_snippet, cluster_id")
+    .in("id", newArticleIds)
+    .not("cluster_id", "is", null)
+    .is("ai_summary", null)
+    .not("original_snippet", "is", null);
+
+  if (error || !candidates?.length) return 0;
+
+  // Sortăm: clustere cu mai multe articole primul
+  const clusterSize: Record<string, number> = {};
+  candidates.forEach((a) => {
+    clusterSize[a.cluster_id!] = (clusterSize[a.cluster_id!] ?? 0) + 1;
+  });
+  const sorted = [...candidates].sort(
+    (a, b) => (clusterSize[b.cluster_id!] ?? 0) - (clusterSize[a.cluster_id!] ?? 0)
+  );
+
+  const AI_PRIORITY_LIMIT = 20;
+  let generated = 0;
+
+  for (const article of sorted.slice(0, AI_PRIORITY_LIMIT)) {
+    const result = await generateAiSummaries(anthropic, article.title, article.original_snippet!);
+    if (result) {
+      await supabase
+        .from("articles")
+        .update({ ai_summary: result.ai_summary, ai_pre_summary: result.ai_pre_summary })
+        .eq("id", article.id);
+      generated++;
+    }
+  }
+
+  return generated;
 }
 
 // ----------------------------------------------------------------
@@ -282,12 +325,22 @@ export async function runFetchCycle(supabase: SupabaseClient): Promise<CycleStat
     }
   }
 
+  // Pas 3: AI prioritar pentru articole clusterate
+  let aiPriority = 0;
+  if (anthropic && allNewArticles.length > 0) {
+    const ids = allNewArticles.map((a) => a.id);
+    aiPriority = await generateAiForClustered(supabase, anthropic, ids);
+    if (aiPriority > 0) {
+      console.log(`[ai-priority] ✓ ${aiPriority} rezumate AI generate pentru știri clusterate`);
+    }
+  }
+
   return {
     sources: sources.length,
     inserted,
     skipped,
     feedErrors,
-    aiGenerated,
+    aiGenerated: aiGenerated + aiPriority,
     newArticles: allNewArticles,
   };
 }
