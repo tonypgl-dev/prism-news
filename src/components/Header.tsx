@@ -19,15 +19,15 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full">
+      <header className="w-full">
         {/* ── Nav principal ──────────────────────────────────────── */}
         <div className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 min-h-32 py-2 flex items-center gap-4">
 
             {/* Logo */}
             <a href="/" className="flex items-center gap-2 shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logomic.png" alt="Prisma News" className="h-8 w-auto" />
+              <img src="/logomic.png" alt="Prisma News" className="h-32 w-auto" />
             </a>
 
             {/* Category selector — centru */}
