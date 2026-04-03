@@ -56,7 +56,7 @@ export default async function HomePage() {
       <footer className="border-t border-gray-200 dark:border-gray-800 mt-12 py-8">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            © {new Date().getFullYear()} Prism News · prism-news.ro
+            © {new Date().getFullYear()} Prisma News · prisma-news.ro
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
             Misiunea noastră: transparența editorială prin compararea perspectivelor

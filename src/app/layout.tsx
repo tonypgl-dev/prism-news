@@ -16,9 +16,9 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Prism News — Știri din toate perspectivele",
+  title: "Prisma News — Știri din toate perspectivele",
   description:
-    "Prism News compară aceeași știre din perspectivele presei de stânga, centru și dreapta pentru a-ți oferi imaginea completă.",
+    "Prisma News compară aceeași știre din perspectivele presei de stânga, centru și dreapta pentru a-ți oferi imaginea completă.",
   metadataBase: new URL("https://prism-news.ro"),
 };
 

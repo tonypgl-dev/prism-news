@@ -47,7 +47,7 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
           <div className="flex items-center gap-2 text-xs text-violet-200">
             <Lock size={14} className="text-violet-400 shrink-0" />
             <span>
-              Ai folosit Prism News {daysUsed} zile.
+              Ai folosit Prisma News {daysUsed} zile.
               <span className="font-bold text-violet-300"> Vizualizarea aliniată și filtrele avansate sunt dezactivate.</span>
             </span>
           </div>

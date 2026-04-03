@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Layers, ChevronDown, Search, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { BreakingTicker } from "./BreakingTicker";
 import { SettingsPanel } from "./SettingsPanel";
@@ -26,12 +26,8 @@ export function Header() {
 
             {/* Logo */}
             <a href="/" className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 via-purple-500 to-red-500">
-                <Layers size={16} className="text-white" />
-              </div>
-              <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white">
-                Prism<span className="text-purple-600">News</span>
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logomic.png" alt="Prisma News" className="h-8 w-auto" />
             </a>
 
             {/* Category selector — centru */}
