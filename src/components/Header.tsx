@@ -29,12 +29,21 @@ export function Header({ tickerItems }: HeaderProps) {
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 min-h-32 py-2 flex items-center gap-4">
 
             {/* Logo */}
-            <a href="/" className="flex items-center gap-3 shrink-0">
+            <a href="/" className="flex items-center gap-2.5 shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logomic.png" alt="Prisma News" className="h-9 w-auto" />
-              <div className="hidden sm:flex flex-col leading-tight">
-                <span className="text-xs text-gray-400 dark:text-gray-500 font-medium tracking-wide">
-                  O știre. Trei surse. Tu decizi.
+              <img src="/logo.png" alt="Prisma News" className="h-10 w-auto" />
+              <div className="flex flex-col leading-none">
+                <span
+                  className="text-[22px] font-extrabold uppercase tracking-tight text-[#1a2f5a] dark:text-white"
+                  style={{ fontFamily: "var(--font-barlow), sans-serif", lineHeight: 1 }}
+                >
+                  PRISMA <span className="text-[#1a2f5a] dark:text-slate-300 font-bold">NEWS</span>
+                </span>
+                <span
+                  className="text-[11px] text-slate-400 dark:text-slate-500 tracking-wide"
+                  style={{ fontFamily: "var(--font-barlow), sans-serif" }}
+                >
+                  prisma-news.ro
                 </span>
               </div>
             </a>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Playfair_Display } from "next/font/google";
+import { Geist, Playfair_Display, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 
@@ -15,6 +15,13 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
+const barlow = Barlow_Condensed({
+  variable: "--font-barlow",
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Prisma News — Știri din toate perspectivele",
   description:
@@ -26,7 +33,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ro" className={`${geist.variable} ${playfair.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="ro" className={`${geist.variable} ${playfair.variable} ${barlow.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
