@@ -20,6 +20,8 @@ const DEFAULT_STATE: FeedFilterState = {
   regions: [...ALL_REGION_KEYS],
 };
 
+export type FeedFilterHook = ReturnType<typeof useFeedFilter>;
+
 export function useFeedFilter() {
   const [filter, setFilter] = useState<FeedFilterState>(DEFAULT_STATE);
   const [isLoaded, setIsLoaded] = useState(false);

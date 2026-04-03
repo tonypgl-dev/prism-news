@@ -44,7 +44,8 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
     right:  rows.filter((r) => r.right  !== null).length,
   }), [rows]);
 
-  const { filter, activeFilterCount } = useFeedFilter();
+  const feedFilter = useFeedFilter();
+  const { filter, activeFilterCount } = feedFilter;
 
   // Calculăm categoria fiecărui row după titlul articolului principal
   const rowsWithCategory = useMemo(() =>
@@ -181,7 +182,7 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
           </div>
 
           {/* Feed filter */}
-          <FeedFilterPanel counts={categoryCounts} regionCounts={regionCounts} />
+          <FeedFilterPanel counts={categoryCounts} regionCounts={regionCounts} filterHook={feedFilter} />
 
           {/* Filtru Blindspot */}
           {isPremium && (

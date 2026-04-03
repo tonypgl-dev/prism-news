@@ -3,15 +3,15 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, ChevronRight, SlidersHorizontal, Check } from "lucide-react";
 import { CATEGORIES, REGIONS, type CategoryKey, type RegionKey } from "@/lib/categories";
-import { useFeedFilter } from "@/hooks/useFeedFilter";
+import type { FeedFilterHook } from "@/hooks/useFeedFilter";
 
 interface Props {
-  /** Numărul de articole per categorie — calculat în NewsPageClient */
   counts: Partial<Record<CategoryKey, number>>;
   regionCounts: Partial<Record<RegionKey, number>>;
+  filterHook: FeedFilterHook;
 }
 
-export function FeedFilterPanel({ counts, regionCounts }: Props) {
+export function FeedFilterPanel({ counts, regionCounts, filterHook }: Props) {
   const [open, setOpen] = useState(false);
   const [regionalExpanded, setRegionalExpanded] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -23,7 +23,7 @@ export function FeedFilterPanel({ counts, regionCounts }: Props) {
     selectAll,
     isAllSelected,
     activeFilterCount,
-  } = useFeedFilter();
+  } = filterHook;
 
   // Închide la click în afară
   useEffect(() => {
@@ -191,6 +191,18 @@ export function FeedFilterPanel({ counts, regionCounts }: Props) {
               );
             })}
           </ul>
+
+          {/* Footer cu buton Aplică */}
+          <div className="border-t border-gray-100 dark:border-gray-800 px-3 py-2">
+            <button
+              onClick={() => setOpen(false)}
+              className="w-full py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-colors"
+            >
+              {activeFilterCount > 0
+                ? `Aplică filtrele (${filter.categories.length} categorii)`
+                : "Închide"}
+            </button>
+          </div>
         </div>
       )}
     </div>
