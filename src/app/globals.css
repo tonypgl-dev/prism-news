@@ -58,8 +58,16 @@ body {
 }
 
 .ticker-inner {
-  animation: ticker 35s linear infinite;
+  animation: ticker 220s linear infinite;
   white-space: nowrap;
+}
+
+/* Logo mobile scale */
+@media (max-width: 639px) {
+  .logo-scale-mobile {
+    transform: scale(0.7);
+    transform-origin: left center;
+  }
 }
 
 /* Line clamp utilities */

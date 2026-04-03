@@ -26,24 +26,108 @@ export function Header({ tickerItems }: HeaderProps) {
       <header className="w-full">
         {/* ── Nav principal ──────────────────────────────────────── */}
         <div className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
-          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 min-h-32 py-2 flex items-center gap-4">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-36 flex items-center gap-4">
 
             {/* Logo */}
-            <a href="/" className="flex items-center gap-2.5 shrink-0">
+            <a href="/" className="relative shrink-0 inline-block logo-scale-mobile">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Prisma News" className="h-10 w-auto" />
-              <div className="flex flex-col leading-none">
+              <img src="/logo.png" alt="Prisma News" style={{ height: "110px", width: "auto", display: "block" }} />
+              {/* Punct de lumină radiant */}
+              <div
+                className="absolute pointer-events-none"
+                style={{ left: "calc(38% - 1px)", top: "calc(42% + 8px)" }}
+              >
+                {/* Raze lungi — cruce de lumină */}
+                <div style={{
+                  position: "absolute",
+                  transform: "translate(-50%, -50%)",
+                  width: "120px",
+                  height: "1px",
+                  background: "linear-gradient(to right, transparent 0%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.5) 70%, transparent 100%)",
+                  filter: "blur(0.5px)",
+                }} />
+                <div style={{
+                  position: "absolute",
+                  transform: "translate(-50%, -50%)",
+                  width: "1px",
+                  height: "100px",
+                  background: "linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.4) 70%, transparent 100%)",
+                  filter: "blur(0.5px)",
+                }} />
+                {/* Glow exterior mare — fade spre margini */}
+                <div style={{
+                  position: "absolute",
+                  transform: "translate(-50%, -50%)",
+                  width: "120px",
+                  height: "120px",
+                  borderRadius: "50%",
+                  background: "radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.18) 25%, rgba(255,255,255,0.03) 50%, transparent 65%)",
+                  filter: "blur(8px)",
+                }} />
+                {/* Glow mijlociu */}
+                <div style={{
+                  position: "absolute",
+                  transform: "translate(-50%, -50%)",
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "50%",
+                  background: "radial-gradient(circle, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.08) 60%, transparent 100%)",
+                  filter: "blur(5px)",
+                }} />
+                {/* Nucleul mic */}
+                <div style={{
+                  position: "absolute",
+                  transform: "translate(-50%, -50%)",
+                  width: "3px",
+                  height: "3px",
+                  borderRadius: "50%",
+                  background: "white",
+                  boxShadow: "0 0 3px 1px rgba(255,255,255,0.8)",
+                }} />
+              </div>
+
+              {/* PRISMA — perspectivă 3D */}
+              <div className="absolute pointer-events-none" style={{ top: "-8px", right: "7px", perspective: "200px", perspectiveOrigin: "right center" }}>
                 <span
-                  className="text-[22px] font-extrabold uppercase tracking-tight text-[#1a2f5a] dark:text-white"
-                  style={{ fontFamily: "var(--font-barlow), sans-serif", lineHeight: 1 }}
+                  className="text-[63px] font-black uppercase tracking-tight"
+                  style={{
+                    fontFamily: "var(--font-barlow), sans-serif",
+                    lineHeight: 1,
+                    background: "linear-gradient(to right, #1a3a5c, #3a9fd4)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    transform: "rotateY(-38deg)",
+                    display: "inline-block",
+                    transformOrigin: "right center",
+                  }}
                 >
-                  PRISMA <span className="text-[#1a2f5a] dark:text-slate-300 font-bold">NEWS</span>
+                  PRISMA
                 </span>
+              </div>
+              {/* NEWS — identic cu PRISMA */}
+              <div className="absolute pointer-events-none" style={{ top: "45px", right: "7px", perspective: "100px", perspectiveOrigin: "right center" }}>
                 <span
-                  className="text-[11px] text-slate-400 dark:text-slate-500 tracking-wide"
-                  style={{ fontFamily: "var(--font-barlow), sans-serif" }}
+                  className="text-[40px] font-black uppercase tracking-tight"
+                  style={{
+                    fontFamily: "var(--font-barlow), sans-serif",
+                    lineHeight: 1,
+                    color: "#8fa3b1",
+                    transform: "rotateY(-38deg) rotate(10deg)",
+                    display: "inline-block",
+                    transformOrigin: "right center",
+                    textShadow: `
+                      -2px -2px 0 rgba(0,0,0,0.85),
+                       2px -2px 0 rgba(0,0,0,0.85),
+                      -2px  2px 0 rgba(0,0,0,0.85),
+                       2px  2px 0 rgba(0,0,0,0.85),
+                      -2px  0   0 rgba(0,0,0,0.85),
+                       2px  0   0 rgba(0,0,0,0.85),
+                       0   -2px 0 rgba(0,0,0,0.85),
+                       0    2px 0 rgba(0,0,0,0.85)
+                    `,
+                  }}
                 >
-                  prisma-news.ro
+                  NEWS
                 </span>
               </div>
             </a>
