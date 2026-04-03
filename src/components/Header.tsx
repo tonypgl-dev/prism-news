@@ -92,9 +92,10 @@ export function Header() {
           </div>
         </div>
 
-        {/* Breaking news ticker (existent, nemodificat) */}
-        <BreakingTicker items={BREAKING_NEWS} />
       </header>
+
+      {/* Breaking news ticker — sticky independent */}
+      <BreakingTicker items={BREAKING_NEWS} />
 
       {/* Panou setări — montat via Portal în document.body */}
       <SettingsPanel
