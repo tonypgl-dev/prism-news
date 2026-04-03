@@ -55,7 +55,8 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
   const hasCluster = siblings > 0;
   const haloGradient = buildHaloGradient(row);
 
-  const hasAiContent = Boolean(article.ai_pre_summary || article.ai_summary || article.original_snippet);
+  const hasAiSummary = Boolean(article.ai_pre_summary || article.ai_summary);
+  const hasAiContent = hasAiSummary || Boolean(article.original_snippet);
   const isCardExpandable = hasAiContent;
 
   const titleClass = titleFont === "serif"
@@ -185,8 +186,12 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
                 <Clock size={10} />
                 <span suppressHydrationWarning>{timeAgo(article.published_at)}</span>
                 {isCardExpandable && (
-                  <span className="ml-1.5 text-[10px] text-purple-500 dark:text-purple-400 font-semibold">
-                    {isExpanded ? "▲ Restrânge" : "▼ Sinteză AI"}
+                  <span className="ml-1.5 text-[10px] font-semibold text-purple-500 dark:text-purple-400">
+                    {isExpanded
+                      ? "▲ Restrânge"
+                      : hasAiSummary
+                      ? "▼ Sinteză AI"
+                      : "▼ Fragment"}
                   </span>
                 )}
               </div>
