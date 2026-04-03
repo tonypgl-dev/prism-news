@@ -9,7 +9,8 @@ import { Newspaper, AlertCircle } from "lucide-react";
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const articles = await fetchLatestArticles(100);
+  const from24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const articles = await fetchLatestArticles({ limit: 30, offset: 0, from: from24h });
   const rows = buildClusterRows(articles);
 
   // Primele 8 titluri recente pentru Breaking Ticker
@@ -52,7 +53,7 @@ export default async function HomePage() {
         {articles.length === 0 ? (
           <EmptyState />
         ) : (
-          <NewsPageClient rows={rows} totalArticles={articles.length} />
+          <NewsPageClient rows={rows} totalArticles={articles.length} initialFrom={from24h} />
         )}
       </main>
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { AlertTriangle, List, Rows3, Lock, X, Sparkles } from "lucide-react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { AlertTriangle, List, Rows3, Lock, X, Sparkles, Loader2 } from "lucide-react";
 import { useFreemium } from "@/hooks/useFreemium";
 import type { ClusterRow } from "@/types";
 import { AlignedGrid } from "./AlignedGrid";
@@ -9,13 +9,12 @@ import { DiscoveryFeed } from "./DiscoveryFeed";
 import { isBlindspot } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
 import { FeedFilterPanel } from "./FeedFilterPanel";
-import { useFeedFilter } from "@/hooks/useFeedFilter";
+import { useFeedFilter, dateRangeToIso } from "@/hooks/useFeedFilter";
 import {
   detectCategory,
   detectRegion,
   type CategoryKey,
   type RegionKey,
-  REGIONS,
 } from "@/lib/categories";
 
 type ViewMode = "discovery" | "aligned";
@@ -23,19 +22,103 @@ type ViewMode = "discovery" | "aligned";
 interface Props {
   rows: ClusterRow[];
   totalArticles: number;
+  initialFrom: string;
 }
 
-export function NewsPageClient({ rows, totalArticles }: Props) {
+export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom }: Props) {
   const [mode, setMode] = useState<ViewMode>("discovery");
   const [blindspotOnly, setBlindspotOnly] = useState(false);
   const [upsellOpen, setUpsellOpen] = useState(false);
   const { isPremium, daysUsed, isLoaded } = useFreemium();
 
+  // ── Infinite scroll state ────────────────────────────────────────────
+  const [rows, setRows] = useState<ClusterRow[]>(initialRows);
+  const [loadedOffset, setLoadedOffset] = useState(initialRows.length);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentFrom, setCurrentFrom] = useState(initialFrom);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Resetăm la schimbarea datelor initiale (dateRange schimbat)
+  const prevFrom = useRef(initialFrom);
+
+  const feedFilter = useFeedFilter();
+  const { filter, activeFilterCount } = feedFilter;
+
+  // Sync dateRange cu rows (fetch nou când se schimbă intervalul)
+  useEffect(() => {
+    const newFrom = dateRangeToIso(filter.dateRange);
+    if (newFrom === currentFrom) return;
+
+    setCurrentFrom(newFrom);
+    setRows([]);
+    setLoadedOffset(0);
+    setHasMore(true);
+
+    // Fetch primul batch cu noul interval
+    fetch(`/api/articles?offset=0&limit=30&from=${encodeURIComponent(newFrom)}`)
+      .then((r) => r.json())
+      .then((data: { rows: ClusterRow[]; total: number }) => {
+        setRows(data.rows);
+        setLoadedOffset(data.rows.length);
+        setHasMore(data.rows.length < data.total);
+      })
+      .catch(console.error);
+  }, [filter.dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Resetăm rows când initialRows se schimbă (navigare)
+  useEffect(() => {
+    if (prevFrom.current !== initialFrom) {
+      prevFrom.current = initialFrom;
+      setRows(initialRows);
+      setLoadedOffset(initialRows.length);
+      setHasMore(true);
+    }
+  }, [initialRows, initialFrom]);
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    try {
+      const res = await fetch(
+        `/api/articles?offset=${loadedOffset}&limit=10&from=${encodeURIComponent(currentFrom)}`
+      );
+      const data: { rows: ClusterRow[]; total: number } = await res.json();
+      setRows((prev) => [...prev, ...data.rows]);
+      setLoadedOffset((prev) => prev + data.rows.length);
+      setHasMore(loadedOffset + data.rows.length < data.total);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, hasMore, loadedOffset, currentFrom]);
+
+  // IntersectionObserver pentru sentinel
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          loadMore();
+        }
+      },
+      { rootMargin: "400px" }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, loadMore]);
+
+  // ── Freemium ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (isLoaded && !isPremium && mode === "aligned") setMode("discovery");
     if (!isPremium) setBlindspotOnly(false);
   }, [isLoaded, isPremium, mode]);
 
+  // ── Stats ─────────────────────────────────────────────────────────────
   const blindspotCount = useMemo(() => rows.filter(isBlindspot).length, [rows]);
 
   const spectrumDist = useMemo(() => ({
@@ -44,10 +127,7 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
     right:  rows.filter((r) => r.right  !== null).length,
   }), [rows]);
 
-  const feedFilter = useFeedFilter();
-  const { filter, activeFilterCount } = feedFilter;
-
-  // Calculăm categoria fiecărui row după titlul articolului principal
+  // ── Filtrare categorii ────────────────────────────────────────────────
   const rowsWithCategory = useMemo(() =>
     rows.map((row) => {
       const article = row.left ?? row.center ?? row.right;
@@ -58,7 +138,6 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
     }),
   [rows]);
 
-  // Numărăm articole per categorie pentru UI
   const categoryCounts = useMemo(() => {
     const counts: Partial<Record<CategoryKey, number>> = {};
     rowsWithCategory.forEach(({ category }) => {
@@ -77,15 +156,12 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
     return counts;
   }, [rowsWithCategory]);
 
-  // Filtrăm rows după categorii selectate
   const filteredRows = useMemo(() =>
     rowsWithCategory
       .filter(({ category, region }) => {
         if (!filter.categories.includes(category)) return false;
-        // Pentru regional verificăm și subregiunea
         if (category === "regional") {
           if (region && !filter.regions.includes(region)) return false;
-          // Dacă nu am detectat o regiune specifică, lăsăm să treacă
         }
         return true;
       })
@@ -146,7 +222,7 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
         {/* Zona dreaptă — acțiuni */}
         <div className="flex items-center gap-2 ml-auto">
 
-          {/* View mode toggle — vizibil mereu, Aliniat blocat pentru non-premium */}
+          {/* View mode toggle */}
           <div
             className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 gap-1 shrink-0"
             role="group"
@@ -254,6 +330,23 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
         <AlignedGrid rows={visibleRows} />
       )}
 
+      {/* ── Sentinel pentru infinite scroll ──────────────────────── */}
+      <div ref={sentinelRef} className="h-4" aria-hidden="true" />
+
+      {/* Indicator loading */}
+      {isLoadingMore && (
+        <div className="flex justify-center py-6">
+          <Loader2 size={20} className="animate-spin text-gray-400" />
+        </div>
+      )}
+
+      {/* Mesaj end of feed */}
+      {!hasMore && rows.length > 0 && (
+        <p className="text-center text-xs text-gray-400 dark:text-gray-600 py-6">
+          Ai văzut toate știrile din intervalul selectat.
+        </p>
+      )}
+
       {/* ── Modal upsell ─────────────────────────────────────────── */}
       {upsellOpen && (
         <div
@@ -272,12 +365,10 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
               <X size={18} />
             </button>
 
-            {/* Icon */}
             <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-violet-600/20 border border-violet-500/30 mb-4">
               <Sparkles size={22} className="text-violet-400" />
             </div>
 
-            {/* Text */}
             <h2 className="text-lg font-bold text-white mb-1">
               Vizualizarea Aliniată este Premium
             </h2>
@@ -287,7 +378,6 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
               Ai folosit Prisma News <span className="text-violet-300 font-semibold">{daysUsed} zile</span> din cele 3 gratuite.
             </p>
 
-            {/* Features list */}
             <ul className="space-y-2 mb-5">
               {[
                 "Prism View — 3 coloane aliniate per subiect",
@@ -301,7 +391,6 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
               ))}
             </ul>
 
-            {/* CTA */}
             <button className="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm transition-colors">
               Activează Premium · 39 lei/lună
             </button>

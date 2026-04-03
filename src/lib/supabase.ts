@@ -57,78 +57,116 @@ function createServerClient() {
 }
 
 // ----------------------------------------------------------------
-// Query principal: ultimele N articole cu sursa inclusă (inner join)
+// Select string reutilizabil
 // ----------------------------------------------------------------
 
-export async function fetchLatestArticles(limit = 100): Promise<Article[]> {
+const ARTICLE_SELECT = `
+  id, source_id, title, summary, link, image_url,
+  published_at, bias, cluster_id, original_snippet,
+  ai_pre_summary, ai_summary,
+  sources (
+    id, name, logo_url, bias, owner,
+    notable_interests, factuality_score, profile_url
+  )
+`;
+
+function mapRow(row: SupabaseArticle): Article {
+  const src = Array.isArray(row.sources) ? row.sources[0] : row.sources;
+  return {
+    id: row.id,
+    source_id: row.source_id,
+    title: row.title,
+    summary: row.summary,
+    link: row.link,
+    image_url: row.image_url,
+    published_at: row.published_at,
+    bias: row.bias,
+    cluster_id: row.cluster_id,
+    original_snippet: row.original_snippet,
+    ai_pre_summary: row.ai_pre_summary,
+    ai_summary: row.ai_summary,
+    source: src
+      ? {
+          id: src.id,
+          name: src.name,
+          logo_url: src.logo_url,
+          bias: src.bias,
+          owner: src.owner,
+          notable_interests: src.notable_interests,
+          factuality_score: src.factuality_score,
+          profile_url: src.profile_url,
+        }
+      : undefined,
+  };
+}
+
+// ----------------------------------------------------------------
+// Query principal: ultimele N articole cu sursa inclusă
+// ----------------------------------------------------------------
+
+export interface FetchArticlesOptions {
+  limit?: number;
+  offset?: number;
+  from?: string; // ISO string
+}
+
+export async function fetchLatestArticles(
+  limitOrOptions: number | FetchArticlesOptions = 30
+): Promise<Article[]> {
   const supabase = createServerClient();
 
-  const { data, error } = await supabase
+  const opts: FetchArticlesOptions =
+    typeof limitOrOptions === "number"
+      ? { limit: limitOrOptions }
+      : limitOrOptions;
+
+  const { limit = 30, offset = 0, from } = opts;
+
+  let query = supabase
     .from("articles")
-    .select(
-      `
-      id,
-      source_id,
-      title,
-      summary,
-      link,
-      image_url,
-      published_at,
-      bias,
-      cluster_id,
-      original_snippet,
-      ai_pre_summary,
-      ai_summary,
-      sources (
-        id,
-        name,
-        logo_url,
-        bias,
-        owner,
-        notable_interests,
-        factuality_score,
-        profile_url
-      )
-    `
-    )
+    .select(ARTICLE_SELECT)
     .order("published_at", { ascending: false })
-    .limit(limit);
+    .range(offset, offset + limit - 1);
+
+  if (from) {
+    query = query.gte("published_at", from);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
-    // Logăm eroarea pe server și returnăm array gol
-    // (pagina va afișa starea goală în loc să crape)
     console.error("[supabase] Eroare fetch articole:", error.message);
     return [];
   }
 
-  return (data as unknown as SupabaseArticle[]).map((row) => {
-    // Supabase restituie join-ul one-to-one ca array cu un singur element
-    const src = Array.isArray(row.sources) ? row.sources[0] : row.sources;
-    return {
-      id: row.id,
-      source_id: row.source_id,
-      title: row.title,
-      summary: row.summary,
-      link: row.link,
-      image_url: row.image_url,
-      published_at: row.published_at,
-      bias: row.bias,
-      cluster_id: row.cluster_id,
-      original_snippet: row.original_snippet,
-      ai_pre_summary: row.ai_pre_summary,
-      ai_summary: row.ai_summary,
-      source: src
-        ? {
-            id: src.id,
-            name: src.name,
-            logo_url: src.logo_url,
-            bias: src.bias,
-            owner: src.owner,
-            notable_interests: src.notable_interests,
-            factuality_score: src.factuality_score,
-            profile_url: src.profile_url,
-          }
-        : undefined,
-    };
-  });
+  return (data as unknown as SupabaseArticle[]).map(mapRow);
+}
+
+// ----------------------------------------------------------------
+// Query pentru API route (cu count total)
+// ----------------------------------------------------------------
+
+export async function fetchArticlesPaginated(opts: {
+  limit: number;
+  offset: number;
+  from: string;
+}): Promise<{ articles: Article[]; total: number }> {
+  const supabase = createServerClient();
+
+  const { data, error, count } = await supabase
+    .from("articles")
+    .select(ARTICLE_SELECT, { count: "exact" })
+    .gte("published_at", opts.from)
+    .order("published_at", { ascending: false })
+    .range(opts.offset, opts.offset + opts.limit - 1);
+
+  if (error) {
+    console.error("[supabase] Eroare fetch paginated:", error.message);
+    return { articles: [], total: 0 };
+  }
+
+  return {
+    articles: (data as unknown as SupabaseArticle[]).map(mapRow),
+    total: count ?? 0,
+  };
 }
