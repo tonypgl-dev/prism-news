@@ -1,10 +1,5 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -12,15 +7,72 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #F9FAFB;
+  --foreground: #111827;
+
+  /* Bias column backgrounds */
+  --bias-left-bg: #EFF6FF;
+  --bias-left-border: #BFDBFE;
+  --bias-left-badge: #2563EB;
+
+  --bias-center-bg: #F8FAFC;
+  --bias-center-border: #CBD5E1;
+  --bias-center-badge: #64748B;
+
+  --bias-right-bg: #FFF5F5;
+  --bias-right-border: #FECACA;
+  --bias-right-badge: #DC2626;
+}
+
+.dark {
+  --background: #0F1117;
+  --foreground: #F3F4F6;
+
+  --bias-left-bg: #1E2A3A;
+  --bias-left-border: #1D4ED8;
+
+  --bias-center-bg: #1E2530;
+  --bias-center-border: #334155;
+
+  --bias-right-bg: #2A1A1A;
+  --bias-right-border: #B91C1C;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Breaking news ticker animation */
+@keyframes ticker {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.ticker-inner {
+  animation: ticker 35s linear infinite;
+  white-space: nowrap;
+}
+
+/* Line clamp utilities */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

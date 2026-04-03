@@ -1,0 +1,110 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { Layers, ChevronDown, Search, SlidersHorizontal } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
+import { BreakingTicker } from "./BreakingTicker";
+import { SettingsPanel } from "./SettingsPanel";
+import { BREAKING_NEWS } from "@/lib/mock-data";
+
+const CATEGORIES = ["Politică", "Economie", "Energie", "Social", "Extern"];
+
+export function Header() {
+  /** Stare panou setări */
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+
+  const openSettings = useCallback(() => setSettingsOpen(true), []);
+  const closeSettings = useCallback(() => setSettingsOpen(false), []);
+
+  return (
+    <>
+      <header className="sticky top-0 z-50 w-full">
+        {/* ── Nav principal ──────────────────────────────────────── */}
+        <div className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
+
+            {/* Logo */}
+            <a href="/" className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 via-purple-500 to-red-500">
+                <Layers size={16} className="text-white" />
+              </div>
+              <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white">
+                Prism<span className="text-purple-600">News</span>
+              </span>
+            </a>
+
+            {/* Category selector — centru */}
+            <div className="flex-1 flex items-center justify-center">
+              <div className="hidden sm:flex items-center gap-1">
+                {CATEGORIES.map((cat, i) => (
+                  <button
+                    key={cat}
+                    className={`
+                      px-3 py-1.5 rounded-full text-sm font-medium transition-colors
+                      ${
+                        i === 0
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
+                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                      }
+                    `}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              {/* Mobile: dropdown */}
+              <div className="sm:hidden flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1.5">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Politică
+                </span>
+                <ChevronDown size={14} className="text-gray-500" />
+              </div>
+            </div>
+
+            {/* Acțiuni dreapta */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Căutare */}
+              <button
+                aria-label="Caută"
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              >
+                <Search size={16} className="text-gray-600 dark:text-gray-400" />
+              </button>
+
+              {/* Theme toggle (existent, nemodificat) */}
+              <ThemeToggle />
+
+              {/* Buton Setări */}
+              <button
+                onClick={openSettings}
+                aria-label="Deschide setările"
+                aria-expanded={settingsOpen}
+                aria-haspopup="dialog"
+                className={`
+                  flex items-center justify-center w-9 h-9 rounded-full transition-colors
+                  ${
+                    settingsOpen
+                      ? "bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400"
+                      : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+                  }
+                `}
+              >
+                <SlidersHorizontal size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Breaking news ticker (existent, nemodificat) */}
+        <BreakingTicker items={BREAKING_NEWS} />
+      </header>
+
+      {/* Panou setări — montat via Portal în document.body */}
+      <SettingsPanel
+        isOpen={settingsOpen}
+        onClose={closeSettings}
+      />
+    </>
+  );
+}
