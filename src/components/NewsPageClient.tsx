@@ -8,6 +8,15 @@ import { AlignedGrid } from "./AlignedGrid";
 import { DiscoveryFeed } from "./DiscoveryFeed";
 import { isBlindspot } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
+import { FeedFilterPanel } from "./FeedFilterPanel";
+import { useFeedFilter } from "@/hooks/useFeedFilter";
+import {
+  detectCategory,
+  detectRegion,
+  type CategoryKey,
+  type RegionKey,
+  REGIONS,
+} from "@/lib/categories";
 
 type ViewMode = "discovery" | "aligned";
 
@@ -35,9 +44,56 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
     right:  rows.filter((r) => r.right  !== null).length,
   }), [rows]);
 
+  const { filter, activeFilterCount } = useFeedFilter();
+
+  // Calculăm categoria fiecărui row după titlul articolului principal
+  const rowsWithCategory = useMemo(() =>
+    rows.map((row) => {
+      const article = row.left ?? row.center ?? row.right;
+      const title = article?.title ?? "";
+      const category = detectCategory(title);
+      const region = category === "regional" ? detectRegion(title) : null;
+      return { row, category, region };
+    }),
+  [rows]);
+
+  // Numărăm articole per categorie pentru UI
+  const categoryCounts = useMemo(() => {
+    const counts: Partial<Record<CategoryKey, number>> = {};
+    rowsWithCategory.forEach(({ category }) => {
+      counts[category] = (counts[category] ?? 0) + 1;
+    });
+    return counts;
+  }, [rowsWithCategory]);
+
+  const regionCounts = useMemo(() => {
+    const counts: Partial<Record<RegionKey, number>> = {};
+    rowsWithCategory.forEach(({ category, region }) => {
+      if (category === "regional" && region) {
+        counts[region] = (counts[region] ?? 0) + 1;
+      }
+    });
+    return counts;
+  }, [rowsWithCategory]);
+
+  // Filtrăm rows după categorii selectate
+  const filteredRows = useMemo(() =>
+    rowsWithCategory
+      .filter(({ category, region }) => {
+        if (!filter.categories.includes(category)) return false;
+        // Pentru regional verificăm și subregiunea
+        if (category === "regional") {
+          if (region && !filter.regions.includes(region)) return false;
+          // Dacă nu am detectat o regiune specifică, lăsăm să treacă
+        }
+        return true;
+      })
+      .map(({ row }) => row),
+  [rowsWithCategory, filter]);
+
   const visibleRows = useMemo(
-    () => (blindspotOnly ? rows.filter(isBlindspot) : rows),
-    [rows, blindspotOnly]
+    () => (blindspotOnly ? filteredRows.filter(isBlindspot) : filteredRows),
+    [filteredRows, blindspotOnly]
   );
 
   return (
@@ -63,7 +119,9 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
 
         {/* Zona stângă — informațional */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">{rows.length} subiecte</span>
+          <span className="text-xs text-gray-500">
+            {filteredRows.length}{rows.length !== filteredRows.length ? ` / ${rows.length}` : ""} subiecte
+          </span>
           <span className="text-xs text-gray-400">·</span>
           <div className="flex gap-1">
             <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
@@ -121,6 +179,9 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
               {!isPremium && isLoaded && <Lock size={10} className="ml-0.5" />}
             </button>
           </div>
+
+          {/* Feed filter */}
+          <FeedFilterPanel counts={categoryCounts} regionCounts={regionCounts} />
 
           {/* Filtru Blindspot */}
           {isPremium && (
