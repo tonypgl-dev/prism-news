@@ -38,7 +38,7 @@ type SupabaseArticle = {
 // Client server-side (service role – nu se expune în browser)
 // ----------------------------------------------------------------
 
-function createServerClient() {
+export function createServerClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key =
     process.env.SUPABASE_SERVICE_ROLE_KEY ??
@@ -169,4 +169,19 @@ export async function fetchArticlesPaginated(opts: {
     articles: (data as unknown as SupabaseArticle[]).map(mapRow),
     total: count ?? 0,
   };
+}
+
+export async function fetchArticlesByClusterId(clusterId: string): Promise<Article[]> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from("articles")
+    .select(ARTICLE_SELECT)
+    .eq("cluster_id", clusterId)
+    .order("published_at", { ascending: false });
+
+  if (error) {
+    console.error("[supabase] fetchArticlesByClusterId:", error.message);
+    return [];
+  }
+  return (data as unknown as SupabaseArticle[]).map(mapRow);
 }
