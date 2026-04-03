@@ -55,7 +55,7 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
   const hasCluster = siblings > 0;
   const haloGradient = buildHaloGradient(row);
 
-  const hasAiContent = Boolean(article.ai_pre_summary || article.ai_summary);
+  const hasAiContent = Boolean(article.ai_pre_summary || article.ai_summary || article.original_snippet);
   const isCardExpandable = hasAiContent;
 
   const titleClass = titleFont === "serif"
