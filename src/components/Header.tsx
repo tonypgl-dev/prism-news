@@ -21,7 +21,7 @@ export function Header() {
     <>
       <header className="w-full">
         {/* ── Nav principal ──────────────────────────────────────── */}
-        <div className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+        <div className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 min-h-32 py-2 flex items-center gap-4">
 
             {/* Logo */}
