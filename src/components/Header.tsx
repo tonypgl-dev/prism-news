@@ -9,7 +9,11 @@ import { BREAKING_NEWS } from "@/lib/mock-data";
 
 const CATEGORIES = ["Politică", "Economie", "Energie", "Social", "Extern"];
 
-export function Header() {
+interface HeaderProps {
+  tickerItems?: string[];
+}
+
+export function Header({ tickerItems }: HeaderProps) {
   /** Stare panou setări */
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -25,9 +29,14 @@ export function Header() {
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 min-h-32 py-2 flex items-center gap-4">
 
             {/* Logo */}
-            <a href="/" className="flex items-center gap-2 shrink-0">
+            <a href="/" className="flex items-center gap-3 shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logomic.png" alt="Prisma News" className="h-32 w-auto" />
+              <img src="/logomic.png" alt="Prisma News" className="h-9 w-auto" />
+              <div className="hidden sm:flex flex-col leading-tight">
+                <span className="text-xs text-gray-400 dark:text-gray-500 font-medium tracking-wide">
+                  O știre. Trei surse. Tu decizi.
+                </span>
+              </div>
             </a>
 
             {/* Category selector — centru */}
@@ -95,7 +104,7 @@ export function Header() {
       </header>
 
       {/* Breaking news ticker — sticky independent */}
-      <BreakingTicker items={BREAKING_NEWS} />
+      <BreakingTicker items={tickerItems && tickerItems.length > 0 ? tickerItems : BREAKING_NEWS} />
 
       {/* Panou setări — montat via Portal în document.body */}
       <SettingsPanel

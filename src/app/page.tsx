@@ -12,6 +12,9 @@ export default async function HomePage() {
   const articles = await fetchLatestArticles(100);
   const rows = buildClusterRows(articles);
 
+  // Primele 8 titluri recente pentru Breaking Ticker
+  const tickerItems = articles.slice(0, 8).map((a) => a.title);
+
   const today = new Date().toLocaleDateString("ro-RO", {
     weekday: "long",
     day: "numeric",
@@ -21,7 +24,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Header />
+      <Header tickerItems={tickerItems} />
 
       <main className="flex-1 max-w-screen-xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
         {/* Page intro */}

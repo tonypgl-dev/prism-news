@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { AlertTriangle, List, Rows3, Lock } from "lucide-react";
+import { AlertTriangle, List, Rows3, Lock, X, Sparkles } from "lucide-react";
 import { useFreemium } from "@/hooks/useFreemium";
 import type { ClusterRow } from "@/types";
 import { AlignedGrid } from "./AlignedGrid";
@@ -19,6 +19,7 @@ interface Props {
 export function NewsPageClient({ rows, totalArticles }: Props) {
   const [mode, setMode] = useState<ViewMode>("discovery");
   const [blindspotOnly, setBlindspotOnly] = useState(false);
+  const [upsellOpen, setUpsellOpen] = useState(false);
   const { isPremium, daysUsed, isLoaded } = useFreemium();
 
   useEffect(() => {
@@ -86,39 +87,40 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
         {/* Zona dreaptă — acțiuni */}
         <div className="flex items-center gap-2 ml-auto">
 
-          {/* View mode toggle */}
-          {isPremium ? (
-            <div
-              className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 gap-1 shrink-0"
-              role="group"
-              aria-label="Mod de afișare"
+          {/* View mode toggle — vizibil mereu, Aliniat blocat pentru non-premium */}
+          <div
+            className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 gap-1 shrink-0"
+            role="group"
+            aria-label="Mod de afișare"
+          >
+            <button
+              onClick={() => setMode("discovery")}
+              aria-pressed={mode === "discovery"}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 ${
+                mode === "discovery"
+                  ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              }`}
             >
-              <button
-                onClick={() => setMode("discovery")}
-                aria-pressed={mode === "discovery"}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 ${
-                  mode === "discovery"
-                    ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                }`}
-              >
-                <List size={13} />
-                Discovery
-              </button>
-              <button
-                onClick={() => setMode("aligned")}
-                aria-pressed={mode === "aligned"}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 ${
-                  mode === "aligned"
-                    ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                }`}
-              >
-                <Rows3 size={13} />
-                Aliniat
-              </button>
-            </div>
-          ) : null}
+              <List size={13} />
+              Discovery
+            </button>
+            <button
+              onClick={() => isPremium ? setMode("aligned") : setUpsellOpen(true)}
+              aria-pressed={mode === "aligned"}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 ${
+                mode === "aligned"
+                  ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                  : !isPremium && isLoaded
+                  ? "text-violet-400 dark:text-violet-400 hover:text-violet-300"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              }`}
+            >
+              <Rows3 size={13} />
+              Aliniat
+              {!isPremium && isLoaded && <Lock size={10} className="ml-0.5" />}
+            </button>
+          </div>
 
           {/* Filtru Blindspot */}
           {isPremium && (
@@ -188,6 +190,64 @@ export function NewsPageClient({ rows, totalArticles }: Props) {
         <DiscoveryFeed rows={visibleRows} />
       ) : (
         <AlignedGrid rows={visibleRows} />
+      )}
+
+      {/* ── Modal upsell ─────────────────────────────────────────── */}
+      {upsellOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setUpsellOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-md rounded-2xl bg-gray-950 border border-violet-700/50 p-6 shadow-2xl shadow-violet-900/30"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setUpsellOpen(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
+              aria-label="Închide"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Icon */}
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-violet-600/20 border border-violet-500/30 mb-4">
+              <Sparkles size={22} className="text-violet-400" />
+            </div>
+
+            {/* Text */}
+            <h2 className="text-lg font-bold text-white mb-1">
+              Vizualizarea Aliniată este Premium
+            </h2>
+            <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+              Modul <span className="text-white font-semibold">Aliniat</span> îți arată aceeași știre din
+              perspectiva presei de stânga, centru și dreapta — pe același rând, față în față.
+              Ai folosit Prisma News <span className="text-violet-300 font-semibold">{daysUsed} zile</span> din cele 3 gratuite.
+            </p>
+
+            {/* Features list */}
+            <ul className="space-y-2 mb-5">
+              {[
+                "Prism View — 3 coloane aliniate per subiect",
+                "Filtre Blindspot — știri ignorate de o tabără",
+                "Acces nelimitat la arhiva de clustere",
+              ].map((f) => (
+                <li key={f} className="flex items-center gap-2 text-xs text-gray-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            {/* CTA */}
+            <button className="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm transition-colors">
+              Activează Premium · 39 lei/lună
+            </button>
+            <p className="text-center text-[11px] text-gray-600 mt-2">
+              Anulezi oricând · Fără abonament automat
+            </p>
+          </div>
+        </div>
       )}
     </>
   );
