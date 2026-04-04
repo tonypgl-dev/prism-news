@@ -28,8 +28,16 @@ export function DiscoveryFeed({ rows }: Props) {
   const { sortRows, recordClick, hasPersonalization } = usePersonalization();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // Sortare personalizată (stabilă — useMemo)
-  const orderedRows = useMemo(() => sortRows(rows), [rows, sortRows]);
+  // Sortare personalizată + deduplicare defensivă după cluster_id
+  const orderedRows = useMemo(() => {
+    const sorted = sortRows(rows);
+    const seen = new Set<string>();
+    return sorted.filter((row) => {
+      if (seen.has(row.cluster_id)) return false;
+      seen.add(row.cluster_id);
+      return true;
+    });
+  }, [rows, sortRows]);
 
   function handleToggle(clusterId: string) {
     const next = expandedId === clusterId ? null : clusterId;

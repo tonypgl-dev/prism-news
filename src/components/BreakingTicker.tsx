@@ -8,7 +8,7 @@ interface Props {
 
 export function BreakingTicker({ items }: Props) {
   return (
-    <div className="sticky top-0 z-50 w-full bg-red-600 text-white text-xs font-semibold overflow-hidden">
+    <div className="w-full bg-red-600 text-white text-xs font-semibold overflow-hidden">
       <div className="flex items-center max-w-screen-xl mx-auto">
         {/* Label fix */}
         <div className="flex items-center gap-1.5 px-3 py-2 bg-red-700 shrink-0 z-10">

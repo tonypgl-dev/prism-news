@@ -1,0 +1,17 @@
+name: Fetch & Cluster Articles
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: # permite rulare manuală din GitHub UI
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger fetch endpoint
+        run: |
+          curl --fail --silent --show-error \
+            -X GET "https://prism-news.ro/api/cron/fetch" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
