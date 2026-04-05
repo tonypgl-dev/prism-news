@@ -80,7 +80,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 export default async function HomePage({ searchParams }: PageProps) {
   const params = await searchParams;
   const featuredParam = params?.featured;
-  const featuredClusterId = featuredParam ? await resolveFeatured(featuredParam) : null;
+  const featuredClusterId = featuredParam ? await resolveFeatured(featuredParam) ?? undefined : undefined;
 
   const from24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const articles = await fetchLatestArticles({ limit: 30, offset: 0, from: from24h });
