@@ -2,7 +2,7 @@ import { Header } from "@/components/Header";
 import { SpectrumSection } from "@/components/SpectrumSection";
 import { buildClusterRows } from "@/lib/cluster";
 import { fetchLatestArticles } from "@/lib/supabase";
-import { Newspaper, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 // Revalidare ISR: reconstituie pagina din 5 în 5 minute
 export const revalidate = 300;
@@ -33,14 +33,14 @@ export default async function HomePage() {
             <div className="flex items-center gap-2 mb-1.5">
               <div className="w-1 h-3 bg-slate-900 dark:bg-white" />
               <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">
-                Daily Briefing
+                Știrile zilei
               </span>
             </div>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none mb-1">
-              The Perspective Feed
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-tight mb-1">
+              Știri din mai multe perspective
             </h1>
             <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-              {today} · Editor&apos;s Selection
+              {today}
             </p>
           </div>
         </div>

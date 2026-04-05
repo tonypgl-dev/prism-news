@@ -211,7 +211,7 @@ export function Header({ tickerItems }: HeaderProps) {
           {/* Logo & Brand — secvență: logo simplu → fascicul conic → efecte raze (flare) */}
           <a
             href="/"
-            className="relative shrink-0 inline-block logo-scale-mobile isolate"
+            className="relative shrink-0 inline-block logo-scale-mobile isolate max-sm:-ml-[30px]"
             onClick={() => runLogoLightSequence()}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
