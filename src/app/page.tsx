@@ -40,11 +40,26 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
   if (!featured) return defaultMeta;
 
+  // og:url conține ÎNTOTDEAUNA featured param — indiferent dacă rezoluția reușește
+  const featuredUrl = `https://prisma-news.ro/?featured=${featured}`;
+
   const clusterId = await resolveFeatured(featured);
-  if (!clusterId) return defaultMeta;
+  if (!clusterId) {
+    // Slug nu s-a rezolvat (RPC SQL lipsă sau cluster inexistent) —
+    // returnăm totuși URL-ul corect ca Facebook să nu piardă param-ul
+    return {
+      ...defaultMeta,
+      openGraph: { ...defaultMeta.openGraph as object, url: featuredUrl },
+    };
+  }
 
   const articles = await fetchArticlesByClusterId(clusterId);
-  if (!articles.length) return defaultMeta;
+  if (!articles.length) {
+    return {
+      ...defaultMeta,
+      openGraph: { ...defaultMeta.openGraph as object, url: featuredUrl },
+    };
+  }
 
   const rep =
     articles.find((a) => a.bias === "center") ??
