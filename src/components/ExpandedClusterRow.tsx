@@ -7,7 +7,7 @@ import { StoryBiasBar } from "./StoryBiasBar";
 import { BlindspotBadge } from "./BlindspotBadge";
 import { BIAS_COLORS } from "@/lib/utils";
 import { useSettings } from "@/hooks/useSettings";
-import { X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 
 const COLUMNS: Bias[] = ["left", "center", "right"];
 
