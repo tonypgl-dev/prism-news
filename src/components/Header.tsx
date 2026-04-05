@@ -158,28 +158,114 @@ export function Header({ tickerItems }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between gap-4 py-2 md:py-0 md:h-32">
+      <header className="sticky top-0 z-50 w-full bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 overflow-visible">
+        <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between gap-4 py-2 md:py-0 md:h-32 overflow-visible">
           
           {/* Logo & Brand - Restored original with light effects */}
-          <a href="/" className="relative shrink-0 inline-block logo-scale-mobile">
+          <a href="/" className="relative shrink-0 inline-block logo-scale-mobile isolate">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Prisma News" style={{ height: "100px", width: "auto", display: "block" }} />
+            <img src="/logomod.png" alt="Prisma News" style={{ height: "100px", width: "auto", display: "block" }} />
+            {/* Rază albă: clip-path animat stânga → dreapta (fără SVG) */}
+            <div className="absolute inset-0 z-[1] pointer-events-none overflow-visible">
+              <div
+                className="pointer-events-none"
+                style={{
+                  position: "absolute",
+                  /* Capăt drept al razei = punctul de contact (același reper ca flare-ul) */
+                  left: "calc(38% - 1px)",
+                  marginLeft: "-58px",
+                  width: "58px",
+                  top: "calc(42% + 8px)",
+                  height: "26px",
+                  transform: "translate(0, -50%) rotate(-11deg)",
+                  transformOrigin: "100% 50%",
+                }}
+              >
+                <div className="logo-ray-reveal-sheath">
+                  <div className="logo-ray-taper-body" aria-hidden />
+                </div>
+              </div>
+            </div>
             <div
-              className="absolute pointer-events-none"
+              className="absolute pointer-events-none z-[1]"
               style={{ left: "calc(38% - 1px)", top: "calc(42% + 8px)" }}
             >
-              <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"120px", height:"1px", background:"linear-gradient(to right, transparent 0%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.5) 70%, transparent 100%)", filter:"blur(0.5px)" }} />
               <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"1px", height:"100px", background:"linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.4) 70%, transparent 100%)", filter:"blur(0.5px)" }} />
               <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"120px", height:"120px", borderRadius:"50%", background:"radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.18) 25%, rgba(255,255,255,0.03) 50%, transparent 65%)", filter:"blur(8px)" }} />
               <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"32px", height:"32px", borderRadius:"50%", background:"radial-gradient(circle, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.08) 60%, transparent 100%)", filter:"blur(5px)" }} />
               <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"3px", height:"3px", borderRadius:"50%", background:"white", boxShadow:"0 0 3px 1px rgba(255,255,255,0.8)" }} />
             </div>
-            <div className="absolute pointer-events-none" style={{ top:"-8px", right:"7px", perspective:"200px", perspectiveOrigin:"right center" }}>
-              <span className="text-[58px] font-black uppercase tracking-tight" style={{ fontFamily:"var(--font-barlow), sans-serif", lineHeight:1, background:"linear-gradient(to right, #1a3a5c, #3a9fd4)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", transform:"rotateY(-38deg)", display:"inline-block", transformOrigin:"right center" }}>PRISMA</span>
+            {/* Text cu alfa + blend: peste prisma se vede grafica; pe fundal navbar rămâne citibil */}
+            <div className="absolute pointer-events-none z-[2] mix-blend-multiply dark:mix-blend-soft-light" style={{ top:"-6px", right:"6px", perspective:"200px", perspectiveOrigin:"right center" }}>
+              <span
+                className="font-black uppercase tracking-tight"
+                style={{
+                  fontFamily: "var(--font-barlow), sans-serif",
+                  fontSize: "78px",
+                  lineHeight: 1,
+                  background: "linear-gradient(to right, rgba(26, 58, 92, 0.78), rgba(58, 159, 212, 0.78))",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  transform: "rotateY(-38deg) rotate(2deg)",
+                  display: "inline-block",
+                  transformOrigin: "right center",
+                }}
+              >
+                PRISMA
+              </span>
             </div>
-            <div className="absolute pointer-events-none" style={{ top:"40px", right:"7px", perspective:"100px", perspectiveOrigin:"right center" }}>
-              <span className="text-[36px] font-black uppercase tracking-tight" style={{ fontFamily:"var(--font-barlow), sans-serif", lineHeight:1, color:"#8fa3b1", transform:"rotateY(-38deg) rotate(10deg)", display:"inline-block", transformOrigin:"right center", textShadow:"-2px -2px 0 rgba(0,0,0,0.85), 2px -2px 0 rgba(0,0,0,0.85), -2px 2px 0 rgba(0,0,0,0.85), 2px 2px 0 rgba(0,0,0,0.85), -2px 0 0 rgba(0,0,0,0.85), 2px 0 0 rgba(0,0,0,0.85), 0 -2px 0 rgba(0,0,0,0.85), 0 2px 0 rgba(0,0,0,0.85)" }}>NEWS</span>
+            <div className="absolute pointer-events-none z-[10]" style={{ top:"40px", right:"7px", perspective:"100px", perspectiveOrigin:"right center" }}>
+              <span
+                className="text-[36px] font-black uppercase tracking-tight"
+                style={{
+                  fontFamily: "var(--font-barlow), sans-serif",
+                  lineHeight: 1,
+                  color: "#8fa3b1",
+                  transform: "scaleX(1.12) scaleY(0.88) rotateY(-38deg) rotate(10deg)",
+                  display: "inline-block",
+                  transformOrigin: "right center",
+                  textShadow: "-2px -2px 0 rgba(0,0,0,0.75), 2px -2px 0 rgba(0,0,0,0.75), -2px 2px 0 rgba(0,0,0,0.75), 2px 2px 0 rgba(0,0,0,0.75), -2px 0 0 rgba(0,0,0,0.75), 2px 0 0 rgba(0,0,0,0.75), 0 -2px 0 rgba(0,0,0,0.75), 0 2px 0 rgba(0,0,0,0.75)",
+                }}
+              >
+                NEWS
+              </span>
+            </div>
+            {/* PRISMA inversat — doar peste pixelii opaci ai logo (mască = alfa PNG) */}
+            <div
+              className="absolute inset-0 z-[3] pointer-events-none"
+              style={{
+                WebkitMaskImage: "url(/logomod.png)",
+                maskImage: "url(/logomod.png)",
+                WebkitMaskSize: "auto 100%",
+                maskSize: "auto 100%",
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+                WebkitMaskPosition: "left center",
+                maskPosition: "left center",
+              }}
+            >
+              <div
+                className="absolute pointer-events-none"
+                style={{ top: "-6px", right: "6px", perspective: "200px", perspectiveOrigin: "right center" }}
+              >
+                <span
+                  className="font-black uppercase tracking-tight"
+                  style={{
+                    fontFamily: "var(--font-barlow), sans-serif",
+                    fontSize: "78px",
+                    lineHeight: 1,
+                    background: "linear-gradient(to right, rgba(26, 58, 92, 0.78), rgba(58, 159, 212, 0.78))",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    transform: "rotateY(-38deg) rotate(2deg)",
+                    display: "inline-block",
+                    transformOrigin: "right center",
+                    filter: "invert(1)",
+                  }}
+                >
+                  PRISMA
+                </span>
+              </div>
             </div>
           </a>
 

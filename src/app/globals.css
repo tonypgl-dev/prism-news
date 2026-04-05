@@ -92,3 +92,74 @@ body {
     margin-bottom: -20px;
   }
 }
+
+/* Rază logo: clip-path dezvăluie de la stânga spre dreapta (fără SVG) */
+@keyframes logo-ray-reveal {
+  0%,
+  6% {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0.08;
+    filter: brightness(0.35);
+  }
+  8% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  8% {
+    clip-path: inset(0 96% 0 0);
+  }
+  22% {
+    clip-path: inset(0 72% 0 0);
+  }
+  42% {
+    clip-path: inset(0 48% 0 0);
+  }
+  62% {
+    clip-path: inset(0 22% 0 0);
+  }
+  82% {
+    clip-path: inset(0 4% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+/* Rază: teacă = animație reveal; corp = trapez subțire stânga, puțin mai lat la contact */
+
+.logo-ray-reveal-sheath {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 100% 0 0);
+  animation: logo-ray-reveal 2.6s cubic-bezier(0.33, 0.9, 0.48, 1) 0.35s both;
+}
+
+.logo-ray-taper-body {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.45) 22%,
+    rgba(255, 255, 255, 0.95) 72%,
+    #ffffff 88%,
+    rgba(255, 255, 255, 0.75) 100%
+  );
+  box-shadow:
+    0 0 3px 0 rgba(255, 255, 255, 0.45),
+    0 0 10px 2px rgba(255, 255, 255, 0.18);
+  /* trapez: stânga foarte subțire, dreapta puțin mai groasă (contact — acum puțin mai subțire) */
+  clip-path: polygon(0% 48.5%, 0% 51.5%, 100% 43%, 100% 57%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-ray-reveal-sheath {
+    animation: none;
+    clip-path: inset(0 0 0 0);
+  }
+}
