@@ -185,3 +185,88 @@ export async function fetchArticlesByClusterId(clusterId: string): Promise<Artic
   }
   return (data as unknown as SupabaseArticle[]).map(mapRow);
 }
+
+// ----------------------------------------------------------------
+// Căutare titlu + summary (ilike OR)
+// ----------------------------------------------------------------
+
+function escapeIlikePattern(raw: string): string {
+  return raw
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/%/g, "\\%")
+    .replace(/_/g, "\\_");
+}
+
+/**
+ * Caută în `title` și `summary` (ilike, OR). Max 20 rezultate, published_at desc.
+ * @param from ISO minim published_at. Lipsește → ultimele 7 zile. `null` → fără filtru temporal.
+ */
+export async function searchArticles(opts: {
+  query: string;
+  from?: string | null;
+}): Promise<Article[]> {
+  const q = opts.query.trim();
+  if (q.length < 2) return [];
+
+  const supabase = createServerClient();
+  const pattern = `%${escapeIlikePattern(q)}%`;
+  const orClause = `title.ilike."${pattern}",summary.ilike."${pattern}"`;
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const fromBound = opts.from === undefined ? sevenDaysAgo : opts.from;
+
+  let queryBuilder = supabase
+    .from("articles")
+    .select(ARTICLE_SELECT)
+    .or(orClause)
+    .order("published_at", { ascending: false })
+    .limit(20);
+
+  if (fromBound !== null) {
+    queryBuilder = queryBuilder.gte("published_at", fromBound);
+  }
+
+  const { data, error } = await queryBuilder;
+
+  if (error) {
+    console.error("[supabase] searchArticles:", error.message);
+    return [];
+  }
+
+  return (data as unknown as SupabaseArticle[]).map(mapRow);
+}
+
+/** Număr total de rânduri care se potrivesc (fără limit 20), pentru API search. */
+export async function searchArticlesCount(opts: {
+  query: string;
+  from?: string | null;
+}): Promise<number> {
+  const q = opts.query.trim();
+  if (q.length < 2) return 0;
+
+  const supabase = createServerClient();
+  const pattern = `%${escapeIlikePattern(q)}%`;
+  const orClause = `title.ilike."${pattern}",summary.ilike."${pattern}"`;
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const fromBound = opts.from === undefined ? sevenDaysAgo : opts.from;
+
+  let queryBuilder = supabase
+    .from("articles")
+    .select("id", { count: "exact", head: true })
+    .or(orClause);
+
+  if (fromBound !== null) {
+    queryBuilder = queryBuilder.gte("published_at", fromBound);
+  }
+
+  const { count, error } = await queryBuilder;
+
+  if (error) {
+    console.error("[supabase] searchArticlesCount:", error.message);
+    return 0;
+  }
+
+  return count ?? 0;
+}

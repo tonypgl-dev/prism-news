@@ -2,8 +2,9 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useSettings } from "@/hooks/useSettings";
-import { SlidersHorizontal, Mail, X, Send } from "lucide-react";
+import { SlidersHorizontal, Mail, X, Send, Search } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { SearchBar } from "./SearchBar";
 import { BreakingTicker } from "./BreakingTicker";
 import { SettingsPanel } from "./SettingsPanel";
 import { BREAKING_NEWS } from "@/lib/mock-data";
@@ -159,6 +160,7 @@ const LOGO_BEAM_END_BUFFER_MS = 45;
 export function Header({ tickerItems, dateLabel }: HeaderProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const { settings } = useSettings();
 
   const [logoLightPhase, setLogoLightPhase] = useState<LogoLightPhase>("plain");
@@ -213,7 +215,8 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
           dark:bg-gray-950 dark:bg-none"
       >
         <div className="max-w-screen-xl mx-auto px-4">
-        <div className="relative flex items-stretch justify-between gap-4 py-2 md:py-0 md:h-32 overflow-visible">
+        <div className="relative flex flex-col py-2 md:py-0 md:h-32 overflow-visible">
+        <div className="relative flex flex-1 items-stretch justify-between gap-3 md:gap-4 min-h-0 overflow-visible">
           
           {/* Logo & Brand — secvență: logo simplu → fascicul conic → efecte raze (flare) */}
           <a
@@ -354,16 +357,33 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
             </div>
           </a>
 
+          {/* Căutare desktop — între logo și nav */}
+          <div className="hidden md:flex flex-1 min-w-0 max-w-xl items-center self-center px-2">
+            <SearchBar className="w-full" />
+          </div>
+
           {/* Centru — Nav (Optional) */}
-          <nav className="hidden md:flex items-center gap-6 self-center">
+          <nav className="hidden md:flex items-center gap-6 self-center shrink-0">
             <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Top Stories</a>
             <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Perspectives</a>
             <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 cursor-not-allowed">Blindspots</a>
           </nav>
 
           {/* Dreapta: acțiuni sus, dată jos în același colț */}
-          <div className="flex min-w-0 flex-col items-end justify-between gap-2 shrink-0 py-0.5 md:py-3 self-stretch">
-            <div className="flex items-center gap-3 shrink-0">
+          <div className="ml-auto flex min-w-0 flex-col items-end justify-between gap-2 shrink-0 py-0.5 md:py-3 self-stretch">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <button
+                type="button"
+                id="mobile-search-toggle"
+                aria-expanded={mobileSearchOpen}
+                aria-controls="mobile-search-panel"
+                onClick={() => setMobileSearchOpen((v) => !v)}
+                className="md:hidden p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+                title={mobileSearchOpen ? "Închide căutarea" : "Caută"}
+                aria-label={mobileSearchOpen ? "Închide căutarea" : "Deschide căutarea"}
+              >
+                <Search size={18} />
+              </button>
               <ThemeToggle />
 
               <button
@@ -400,6 +420,21 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
               onClose={() => setContactOpen(false)}
             />
           )}
+        </div>
+
+        {mobileSearchOpen ? (
+          <div
+            id="mobile-search-panel"
+            className="md:hidden w-full border-t border-gray-200 dark:border-gray-800 pt-2 pb-1 mt-1"
+            role="search"
+          >
+            <SearchBar
+              autoFocus
+              onRequestClose={() => setMobileSearchOpen(false)}
+              className="w-full"
+            />
+          </div>
+        ) : null}
         </div>
         </div>
       </header>

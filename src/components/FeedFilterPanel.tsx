@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, ChevronRight, SlidersHorizontal, Check, Calendar } from "lucide-react";
+import { ChevronDown, ChevronRight, SlidersHorizontal, Check } from "lucide-react";
 import { CATEGORIES, REGIONS, type CategoryKey, type RegionKey } from "@/lib/categories";
 import { DATE_RANGE_OPTIONS } from "@/hooks/useFeedFilter";
 import type { FeedFilterHook } from "@/hooks/useFeedFilter";
@@ -73,31 +73,22 @@ export function FeedFilterPanel({ counts, regionCounts, filterHook }: Props) {
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute top-full mt-2 right-0 z-40 w-64 rounded-sm border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-2xl shadow-black/10 overflow-hidden">
+        <div className="absolute top-full left-0 mt-2 z-40 w-64 max-w-[min(16rem,calc(100vw-1.5rem))] rounded-sm border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-2xl shadow-black/10 overflow-hidden">
 
-          {/* Header */}
-          <div className="flex items-center justify-between px-3 h-10 border-b border-gray-100 dark:border-gray-800">
-            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-              Filter Feed
-            </span>
-            {!isAllSelected && (
+          {!isAllSelected && (
+            <div className="flex justify-end px-3 py-2 border-b border-gray-100 dark:border-gray-800">
               <button
+                type="button"
                 onClick={selectAll}
                 className="text-[10px] text-slate-900 dark:text-white font-black uppercase tracking-widest hover:underline decoration-2 underline-offset-2"
               >
                 Reset
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Interval de date */}
           <div className="px-3 py-3 border-b border-gray-100 dark:border-gray-800">
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar size={12} className="text-slate-400" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                Timeframe
-              </span>
-            </div>
             <div className="grid grid-cols-2 gap-2">
               {DATE_RANGE_OPTIONS.map((opt) => {
                 const isActive = filter.dateRange === opt.key;
@@ -199,13 +190,14 @@ export function FeedFilterPanel({ counts, regionCounts, filterHook }: Props) {
             })}
           </ul>
 
-          {/* Footer cu buton Aplică */}
+          {/* Footer */}
           <div className="border-t border-gray-100 dark:border-gray-800 p-3">
             <button
+              type="button"
               onClick={() => setOpen(false)}
-              className="w-full py-3 rounded-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all"
+              className="w-full py-3 rounded-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-black hover:opacity-90 transition-all"
             >
-              Apply Filter
+              Aplică
             </button>
           </div>
         </div>
