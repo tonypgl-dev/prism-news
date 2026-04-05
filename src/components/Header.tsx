@@ -164,7 +164,7 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
   const router = useRouter();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { settings } = useSettings();
 
   const [logoLightPhase, setLogoLightPhase] = useState<LogoLightPhase>("plain");
@@ -361,30 +361,18 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
             </div>
           </a>
 
-          {/* Căutare desktop — între logo și nav */}
-          <div className="hidden md:flex flex-1 min-w-0 max-w-xl items-center self-center px-2">
-            <SearchBar className="w-full" />
-          </div>
-
-          {/* Centru — Nav (Optional) */}
-          <nav className="hidden md:flex items-center gap-6 self-center shrink-0">
-            <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Top Stories</a>
-            <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Perspectives</a>
-            <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 cursor-not-allowed">Blindspots</a>
-          </nav>
-
           {/* Dreapta: acțiuni sus, dată jos în același colț */}
           <div className="ml-auto flex min-w-0 flex-col items-end justify-between gap-2 shrink-0 py-0.5 md:py-3 self-stretch">
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <button
                 type="button"
-                id="mobile-search-toggle"
-                aria-expanded={mobileSearchOpen}
-                aria-controls="mobile-search-panel"
-                onClick={() => setMobileSearchOpen((v) => !v)}
-                className="md:hidden p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
-                title={mobileSearchOpen ? "Închide căutarea" : "Caută"}
-                aria-label={mobileSearchOpen ? "Închide căutarea" : "Deschide căutarea"}
+                id="header-search-toggle"
+                aria-expanded={searchOpen}
+                aria-controls="header-search-panel"
+                onClick={() => setSearchOpen((v) => !v)}
+                className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+                title={searchOpen ? "Închide căutarea" : "Caută"}
+                aria-label={searchOpen ? "Închide căutarea" : "Deschide căutarea"}
               >
                 <Search size={18} />
               </button>
@@ -426,15 +414,15 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
           )}
         </div>
 
-        {mobileSearchOpen ? (
+        {searchOpen ? (
           <div
-            id="mobile-search-panel"
-            className="md:hidden w-full border-t border-gray-200 dark:border-gray-800 pt-2 pb-1 mt-1"
+            id="header-search-panel"
+            className="w-full max-w-2xl mx-auto border-t border-gray-200 dark:border-gray-800 pt-2 pb-1 mt-1 px-0 sm:px-2"
             role="search"
           >
             <SearchBar
               autoFocus
-              onRequestClose={() => setMobileSearchOpen(false)}
+              onRequestClose={() => setSearchOpen(false)}
               className="w-full"
             />
           </div>
