@@ -8,6 +8,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { SearchBar } from "./SearchBar";
 import { BreakingTicker } from "./BreakingTicker";
 import { SettingsPanel } from "./SettingsPanel";
+import { VisitorCounter } from "./VisitorCounter";
 import { BREAKING_NEWS } from "@/lib/mock-data";
 
 interface HeaderProps {
@@ -396,14 +397,17 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
               </button>
             </div>
 
-            {dateLabel ? (
-              <p
-                className="text-[9px] sm:text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide text-right max-w-[min(100%,11rem)] leading-snug"
-                suppressHydrationWarning
-              >
-                {dateLabel}
-              </p>
-            ) : null}
+            <div className="flex flex-col items-end gap-0.5">
+              {dateLabel ? (
+                <p
+                  className="text-[9px] sm:text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide text-right max-w-[min(100%,11rem)] leading-snug"
+                  suppressHydrationWarning
+                >
+                  {dateLabel}
+                </p>
+              ) : null}
+              <VisitorCounter />
+            </div>
           </div>
 
           {contactOpen && (
