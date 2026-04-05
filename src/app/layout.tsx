@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Playfair_Display, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import { SettingsProvider } from "@/contexts/SettingsContext";
+import { CookieConsent } from "@/components/CookieConsent";
 
 const geist = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +48,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
         <SettingsProvider>{children}</SettingsProvider>
+        <CookieConsent />
       </body>
     </html>
   );
