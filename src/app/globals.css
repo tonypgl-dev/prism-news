@@ -93,37 +93,20 @@ body {
   }
 }
 
-/* Rază logo: clip-path dezvăluie de la stânga spre dreapta (fără SVG) */
+/* Rază logo: un singur sweep clip-path (interpolare lină = fără sacadări) */
 @keyframes logo-ray-reveal {
   0%,
-  6% {
+  4% {
     clip-path: inset(0 100% 0 0);
-    opacity: 0.08;
-    filter: brightness(0.35);
+    opacity: 0.06;
   }
-  8% {
+  7% {
     opacity: 1;
-    filter: brightness(1);
-  }
-  8% {
-    clip-path: inset(0 96% 0 0);
-  }
-  22% {
-    clip-path: inset(0 72% 0 0);
-  }
-  42% {
-    clip-path: inset(0 48% 0 0);
-  }
-  62% {
-    clip-path: inset(0 22% 0 0);
-  }
-  82% {
-    clip-path: inset(0 4% 0 0);
+    clip-path: inset(0 100% 0 0);
   }
   100% {
     clip-path: inset(0 0 0 0);
     opacity: 1;
-    filter: brightness(1);
   }
 }
 
@@ -133,7 +116,17 @@ body {
   position: absolute;
   inset: 0;
   clip-path: inset(0 100% 0 0);
-  animation: logo-ray-reveal 2.6s cubic-bezier(0.33, 0.9, 0.48, 1) 0.35s both;
+}
+
+.logo-ray-reveal-sheath--animate {
+  will-change: clip-path;
+  /* linear pe tot sweep-ul = viteză constantă, fără „pași” vizibili */
+  animation: logo-ray-reveal 0.88s linear 0.06s both;
+}
+
+.logo-ray-reveal-sheath--done {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
 }
 
 .logo-ray-taper-body {
@@ -158,7 +151,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .logo-ray-reveal-sheath {
+  .logo-ray-reveal-sheath--animate {
     animation: none;
     clip-path: inset(0 0 0 0);
   }

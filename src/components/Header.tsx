@@ -147,48 +147,114 @@ function ContactModal({ anchorRef, onClose }: {
 
 // ── Header ────────────────────────────────────────────────────────────────────
 
+type LogoLightPhase = "plain" | "beam" | "complete";
+
+const LOGO_PLAIN_MS = 220;
+/** de la start fază beam: delay 60ms + durată 880ms (globals.css) */
+const LOGO_BEAM_ANIM_MS = 60 + 880;
+const LOGO_BEAM_END_BUFFER_MS = 45;
+
 export function Header({ tickerItems }: HeaderProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const { settings } = useSettings();
 
+  const [logoLightPhase, setLogoLightPhase] = useState<LogoLightPhase>("plain");
+  const [beamAnimKey, setBeamAnimKey] = useState(0);
+  const logoLightTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearLogoLightTimeouts = useCallback(() => {
+    logoLightTimeoutsRef.current.forEach(clearTimeout);
+    logoLightTimeoutsRef.current = [];
+  }, []);
+
+  const runLogoLightSequence = useCallback(() => {
+    clearLogoLightTimeouts();
+    setLogoLightPhase("plain");
+    setBeamAnimKey((k) => k + 1);
+
+    logoLightTimeoutsRef.current.push(
+      setTimeout(() => {
+        setLogoLightPhase("beam");
+      }, LOGO_PLAIN_MS)
+    );
+
+    logoLightTimeoutsRef.current.push(
+      setTimeout(() => {
+        setLogoLightPhase("complete");
+      }, LOGO_PLAIN_MS + LOGO_BEAM_ANIM_MS + LOGO_BEAM_END_BUFFER_MS)
+    );
+  }, [clearLogoLightTimeouts]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setLogoLightPhase("complete");
+      return undefined;
+    }
+    runLogoLightSequence();
+    return () => clearLogoLightTimeouts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- secvență doar la mount (și Strict Mode cleanup)
+  }, []);
+
   const openSettings = useCallback(() => setSettingsOpen(true), []);
   const closeSettings = useCallback(() => setSettingsOpen(false), []);
   const contactBtnRef = useRef<HTMLButtonElement>(null);
+
+  const showCodeRayEffects = logoLightPhase === "complete";
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 overflow-visible">
         <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between gap-4 py-2 md:py-0 md:h-32 overflow-visible">
           
-          {/* Logo & Brand - Restored original with light effects */}
-          <a href="/" className="relative shrink-0 inline-block logo-scale-mobile isolate">
+          {/* Logo & Brand — secvență: logo simplu → fascicul conic → efecte raze (flare) */}
+          <a
+            href="/"
+            className="relative shrink-0 inline-block logo-scale-mobile isolate"
+            onClick={() => runLogoLightSequence()}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logomod.png" alt="Prisma News" style={{ height: "100px", width: "auto", display: "block" }} />
-            {/* Rază albă: clip-path animat stânga → dreapta (fără SVG) */}
-            <div className="absolute inset-0 z-[1] pointer-events-none overflow-visible">
+            {/* Fascicul conic: vizibil doar în fazele beam + complete */}
+            <div
+              className={`absolute inset-0 z-[1] pointer-events-none overflow-visible transition-opacity duration-200 ${
+                logoLightPhase === "plain" ? "opacity-0" : "opacity-100"
+              }`}
+            >
               <div
                 className="pointer-events-none"
                 style={{
                   position: "absolute",
-                  /* Capăt drept al razei = punctul de contact (același reper ca flare-ul) */
                   left: "calc(38% - 1px)",
                   marginLeft: "-58px",
                   width: "58px",
-                  top: "calc(42% + 8px)",
+                  top: "calc(42% + 10px)",
                   height: "26px",
                   transform: "translate(0, -50%) rotate(-11deg)",
                   transformOrigin: "100% 50%",
                 }}
               >
-                <div className="logo-ray-reveal-sheath">
-                  <div className="logo-ray-taper-body" aria-hidden />
-                </div>
+                {logoLightPhase === "beam" && (
+                  <div
+                    key={beamAnimKey}
+                    className="logo-ray-reveal-sheath logo-ray-reveal-sheath--animate"
+                  >
+                    <div className="logo-ray-taper-body" aria-hidden />
+                  </div>
+                )}
+                {logoLightPhase === "complete" && (
+                  <div className="logo-ray-reveal-sheath logo-ray-reveal-sheath--done">
+                    <div className="logo-ray-taper-body" aria-hidden />
+                  </div>
+                )}
               </div>
             </div>
             <div
-              className="absolute pointer-events-none z-[1]"
-              style={{ left: "calc(38% - 1px)", top: "calc(42% + 8px)" }}
+              className={`absolute pointer-events-none z-[1] transition-opacity duration-500 ${
+                showCodeRayEffects ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ left: "calc(38% - 1px)", top: "calc(42% + 10px)" }}
             >
               <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"1px", height:"100px", background:"linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.4) 70%, transparent 100%)", filter:"blur(0.5px)" }} />
               <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"120px", height:"120px", borderRadius:"50%", background:"radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.18) 25%, rgba(255,255,255,0.03) 50%, transparent 65%)", filter:"blur(8px)" }} />
@@ -196,7 +262,10 @@ export function Header({ tickerItems }: HeaderProps) {
               <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"3px", height:"3px", borderRadius:"50%", background:"white", boxShadow:"0 0 3px 1px rgba(255,255,255,0.8)" }} />
             </div>
             {/* Text cu alfa + blend: peste prisma se vede grafica; pe fundal navbar rămâne citibil */}
-            <div className="absolute pointer-events-none z-[2] mix-blend-multiply dark:mix-blend-soft-light" style={{ top:"-6px", right:"6px", perspective:"200px", perspectiveOrigin:"right center" }}>
+            <div
+              className="absolute pointer-events-none z-[2] mix-blend-multiply dark:mix-blend-soft-light"
+              style={{ top: "-6px", right: "6px", perspective: "200px", perspectiveOrigin: "right center" }}
+            >
               <span
                 className="font-black uppercase tracking-tight"
                 style={{
@@ -207,14 +276,19 @@ export function Header({ tickerItems }: HeaderProps) {
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   transform: "rotateY(-38deg) rotate(2deg)",
-                  display: "inline-block",
                   transformOrigin: "right center",
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                  display: "inline-block",
                 }}
               >
                 PRISMA
               </span>
             </div>
-            <div className="absolute pointer-events-none z-[10]" style={{ top:"40px", right:"7px", perspective:"100px", perspectiveOrigin:"right center" }}>
+            <div
+              className="absolute pointer-events-none z-[10]"
+              style={{ top: "40px", right: "7px", perspective: "100px", perspectiveOrigin: "right center" }}
+            >
               <span
                 className="text-[36px] font-black uppercase tracking-tight"
                 style={{
@@ -222,8 +296,10 @@ export function Header({ tickerItems }: HeaderProps) {
                   lineHeight: 1,
                   color: "#8fa3b1",
                   transform: "scaleX(1.12) scaleY(0.88) rotateY(-38deg) rotate(10deg)",
-                  display: "inline-block",
                   transformOrigin: "right center",
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                  display: "inline-block",
                   textShadow: "-2px -2px 0 rgba(0,0,0,0.75), 2px -2px 0 rgba(0,0,0,0.75), -2px 2px 0 rgba(0,0,0,0.75), 2px 2px 0 rgba(0,0,0,0.75), -2px 0 0 rgba(0,0,0,0.75), 2px 0 0 rgba(0,0,0,0.75), 0 -2px 0 rgba(0,0,0,0.75), 0 2px 0 rgba(0,0,0,0.75)",
                 }}
               >
@@ -258,8 +334,10 @@ export function Header({ tickerItems }: HeaderProps) {
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     transform: "rotateY(-38deg) rotate(2deg)",
-                    display: "inline-block",
                     transformOrigin: "right center",
+                    backfaceVisibility: "hidden",
+                    WebkitBackfaceVisibility: "hidden",
+                    display: "inline-block",
                     filter: "invert(1)",
                   }}
                 >
