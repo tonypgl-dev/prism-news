@@ -1,209 +1,231 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useSettings } from "@/hooks/useSettings";
+import { SlidersHorizontal, Mail, X, Send } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { BreakingTicker } from "./BreakingTicker";
 import { SettingsPanel } from "./SettingsPanel";
 import { BREAKING_NEWS } from "@/lib/mock-data";
 
-const CATEGORIES = ["Politică", "Economie", "Energie", "Social", "Extern"];
-
 interface HeaderProps {
   tickerItems?: string[];
 }
 
-export function Header({ tickerItems }: HeaderProps) {
-  /** Stare panou setări */
-  const [settingsOpen, setSettingsOpen] = useState(false);
+// ── Modal Contact ─────────────────────────────────────────────────────────────
 
+function ContactModal({ anchorRef, onClose }: {
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
+  onClose: () => void;
+}) {
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Închide la click în afara modalului
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(e.target as Node) &&
+        !anchorRef.current?.contains(e.target as Node)
+      ) {
+        onClose();
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [anchorRef, onClose]);
+
+  // Închide la Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  async function handleSend(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email || !message) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, message }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error ?? "Eroare la trimitere. Încearcă din nou.");
+      } else {
+        setSent(true);
+        setTimeout(onClose, 2000);
+      }
+    } catch {
+      setError("Eroare de rețea. Încearcă din nou.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Contact"
+      className="absolute right-0 top-full mt-2 z-[80] w-80
+                 bg-white dark:bg-gray-950
+                 border border-gray-200 dark:border-gray-800
+                 rounded-sm shadow-2xl shadow-black/20
+                 p-4"
+    >
+      {/* Header modal */}
+      <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center gap-2">
+          <Mail size={14} className="text-slate-900 dark:text-white" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Contact Us</span>
+        </div>
+        <button
+          onClick={onClose}
+          className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+          aria-label="Închide"
+        >
+          <X size={14} />
+        </button>
+      </div>
+
+      {sent ? (
+        <div className="py-4 text-center text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-widest">
+          ✓ Message Prepared
+        </div>
+      ) : (
+        <form onSubmit={handleSend} className="flex flex-col gap-3">
+          <input
+            type="email"
+            required
+            placeholder="YOUR EMAIL"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-3 py-2 text-[11px] font-bold uppercase tracking-widest rounded-sm border border-gray-200 dark:border-gray-800
+                       bg-white dark:bg-gray-900 text-slate-900 dark:text-white
+                       placeholder-slate-300 dark:placeholder-gray-600
+                       focus:outline-none focus:border-slate-900 dark:focus:border-white transition-colors"
+          />
+          <textarea
+            required
+            placeholder="YOUR MESSAGE..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={4}
+            className="w-full px-3 py-2 text-[11px] font-bold uppercase tracking-widest rounded-sm border border-gray-200 dark:border-gray-800
+                       bg-white dark:bg-gray-900 text-slate-900 dark:text-white
+                       placeholder-slate-300 dark:placeholder-gray-600
+                       focus:outline-none focus:border-slate-900 dark:focus:border-white transition-colors
+                       resize-none"
+          />
+          {error && (
+            <p className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">{error}</p>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex items-center justify-center gap-2 w-full py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-all rounded-sm"
+          >
+            <Send size={12} />
+            {loading ? "Sending…" : "Send Message"}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+export function Header({ tickerItems }: HeaderProps) {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const { settings } = useSettings();
 
   const openSettings = useCallback(() => setSettingsOpen(true), []);
   const closeSettings = useCallback(() => setSettingsOpen(false), []);
+  const contactBtnRef = useRef<HTMLButtonElement>(null);
 
   return (
     <>
-      <header className="w-full">
-        {/* ── Nav principal ──────────────────────────────────────── */}
-        <div className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
-          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-36 flex items-center gap-4">
-
-            {/* Logo */}
-            <a href="/" className="relative shrink-0 inline-block logo-scale-mobile">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Prisma News" style={{ height: "110px", width: "auto", display: "block" }} />
-              {/* Punct de lumină radiant */}
-              <div
-                className="absolute pointer-events-none"
-                style={{ left: "calc(38% - 1px)", top: "calc(42% + 8px)" }}
-              >
-                {/* Raze lungi — cruce de lumină */}
-                <div style={{
-                  position: "absolute",
-                  transform: "translate(-50%, -50%)",
-                  width: "120px",
-                  height: "1px",
-                  background: "linear-gradient(to right, transparent 0%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.5) 70%, transparent 100%)",
-                  filter: "blur(0.5px)",
-                }} />
-                <div style={{
-                  position: "absolute",
-                  transform: "translate(-50%, -50%)",
-                  width: "1px",
-                  height: "100px",
-                  background: "linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.4) 70%, transparent 100%)",
-                  filter: "blur(0.5px)",
-                }} />
-                {/* Glow exterior mare — fade spre margini */}
-                <div style={{
-                  position: "absolute",
-                  transform: "translate(-50%, -50%)",
-                  width: "120px",
-                  height: "120px",
-                  borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.18) 25%, rgba(255,255,255,0.03) 50%, transparent 65%)",
-                  filter: "blur(8px)",
-                }} />
-                {/* Glow mijlociu */}
-                <div style={{
-                  position: "absolute",
-                  transform: "translate(-50%, -50%)",
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.08) 60%, transparent 100%)",
-                  filter: "blur(5px)",
-                }} />
-                {/* Nucleul mic */}
-                <div style={{
-                  position: "absolute",
-                  transform: "translate(-50%, -50%)",
-                  width: "3px",
-                  height: "3px",
-                  borderRadius: "50%",
-                  background: "white",
-                  boxShadow: "0 0 3px 1px rgba(255,255,255,0.8)",
-                }} />
-              </div>
-
-              {/* PRISMA — perspectivă 3D */}
-              <div className="absolute pointer-events-none" style={{ top: "-8px", right: "7px", perspective: "200px", perspectiveOrigin: "right center" }}>
-                <span
-                  className="text-[63px] font-black uppercase tracking-tight"
-                  style={{
-                    fontFamily: "var(--font-barlow), sans-serif",
-                    lineHeight: 1,
-                    background: "linear-gradient(to right, #1a3a5c, #3a9fd4)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    transform: "rotateY(-38deg)",
-                    display: "inline-block",
-                    transformOrigin: "right center",
-                  }}
-                >
-                  PRISMA
-                </span>
-              </div>
-              {/* NEWS — identic cu PRISMA */}
-              <div className="absolute pointer-events-none" style={{ top: "45px", right: "7px", perspective: "100px", perspectiveOrigin: "right center" }}>
-                <span
-                  className="text-[40px] font-black uppercase tracking-tight"
-                  style={{
-                    fontFamily: "var(--font-barlow), sans-serif",
-                    lineHeight: 1,
-                    color: "#8fa3b1",
-                    transform: "rotateY(-38deg) rotate(10deg)",
-                    display: "inline-block",
-                    transformOrigin: "right center",
-                    textShadow: `
-                      -2px -2px 0 rgba(0,0,0,0.85),
-                       2px -2px 0 rgba(0,0,0,0.85),
-                      -2px  2px 0 rgba(0,0,0,0.85),
-                       2px  2px 0 rgba(0,0,0,0.85),
-                      -2px  0   0 rgba(0,0,0,0.85),
-                       2px  0   0 rgba(0,0,0,0.85),
-                       0   -2px 0 rgba(0,0,0,0.85),
-                       0    2px 0 rgba(0,0,0,0.85)
-                    `,
-                  }}
-                >
-                  NEWS
-                </span>
-              </div>
-            </a>
-
-            {/* Category selector — centru */}
-            <div className="flex-1 flex items-center justify-center">
-              <div className="hidden sm:flex items-center gap-1">
-                {CATEGORIES.map((cat, i) => (
-                  <button
-                    key={cat}
-                    className={`
-                      px-3 py-1.5 rounded-full text-sm font-medium transition-colors
-                      ${
-                        i === 0
-                          ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
-                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-                      }
-                    `}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-              {/* Mobile: dropdown */}
-              <div className="sm:hidden flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1.5">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Politică
-                </span>
-                <ChevronDown size={14} className="text-gray-500" />
-              </div>
+      <header className="sticky top-0 z-50 w-full bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between gap-4 py-2 md:py-0 md:h-32">
+          
+          {/* Logo & Brand - Restored original with light effects */}
+          <a href="/" className="relative shrink-0 inline-block logo-scale-mobile">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Prisma News" style={{ height: "100px", width: "auto", display: "block" }} />
+            <div
+              className="absolute pointer-events-none"
+              style={{ left: "calc(38% - 1px)", top: "calc(42% + 8px)" }}
+            >
+              <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"120px", height:"1px", background:"linear-gradient(to right, transparent 0%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.5) 70%, transparent 100%)", filter:"blur(0.5px)" }} />
+              <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"1px", height:"100px", background:"linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.4) 70%, transparent 100%)", filter:"blur(0.5px)" }} />
+              <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"120px", height:"120px", borderRadius:"50%", background:"radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.18) 25%, rgba(255,255,255,0.03) 50%, transparent 65%)", filter:"blur(8px)" }} />
+              <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"32px", height:"32px", borderRadius:"50%", background:"radial-gradient(circle, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.08) 60%, transparent 100%)", filter:"blur(5px)" }} />
+              <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"3px", height:"3px", borderRadius:"50%", background:"white", boxShadow:"0 0 3px 1px rgba(255,255,255,0.8)" }} />
             </div>
-
-            {/* Acțiuni dreapta */}
-            <div className="flex items-center gap-2 shrink-0">
-              {/* Căutare */}
-              <button
-                aria-label="Caută"
-                className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              >
-                <Search size={16} className="text-gray-600 dark:text-gray-400" />
-              </button>
-
-              {/* Theme toggle (existent, nemodificat) */}
-              <ThemeToggle />
-
-              {/* Buton Setări */}
-              <button
-                onClick={openSettings}
-                aria-label="Deschide setările"
-                aria-expanded={settingsOpen}
-                aria-haspopup="dialog"
-                className={`
-                  flex items-center justify-center w-9 h-9 rounded-full transition-colors
-                  ${
-                    settingsOpen
-                      ? "bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400"
-                      : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
-                  }
-                `}
-              >
-                <SlidersHorizontal size={16} />
-              </button>
+            <div className="absolute pointer-events-none" style={{ top:"-8px", right:"7px", perspective:"200px", perspectiveOrigin:"right center" }}>
+              <span className="text-[58px] font-black uppercase tracking-tight" style={{ fontFamily:"var(--font-barlow), sans-serif", lineHeight:1, background:"linear-gradient(to right, #1a3a5c, #3a9fd4)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", transform:"rotateY(-38deg)", display:"inline-block", transformOrigin:"right center" }}>PRISMA</span>
             </div>
+            <div className="absolute pointer-events-none" style={{ top:"40px", right:"7px", perspective:"100px", perspectiveOrigin:"right center" }}>
+              <span className="text-[36px] font-black uppercase tracking-tight" style={{ fontFamily:"var(--font-barlow), sans-serif", lineHeight:1, color:"#8fa3b1", transform:"rotateY(-38deg) rotate(10deg)", display:"inline-block", transformOrigin:"right center", textShadow:"-2px -2px 0 rgba(0,0,0,0.85), 2px -2px 0 rgba(0,0,0,0.85), -2px 2px 0 rgba(0,0,0,0.85), 2px 2px 0 rgba(0,0,0,0.85), -2px 0 0 rgba(0,0,0,0.85), 2px 0 0 rgba(0,0,0,0.85), 0 -2px 0 rgba(0,0,0,0.85), 0 2px 0 rgba(0,0,0,0.85)" }}>NEWS</span>
+            </div>
+          </a>
+
+          {/* Centru — Nav (Optional) */}
+          <nav className="hidden md:flex items-center gap-6">
+            <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Top Stories</a>
+            <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Perspectives</a>
+            <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 cursor-not-allowed">Blindspots</a>
+          </nav>
+
+          {/* Acțiuni dreapta */}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            
+            <button
+              ref={contactBtnRef}
+              onClick={() => setContactOpen((v) => !v)}
+              className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+              title="Contact"
+            >
+              <Mail size={18} />
+            </button>
+
+            <button
+              onClick={openSettings}
+              className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+              title="Settings"
+            >
+              <SlidersHorizontal size={18} />
+            </button>
           </div>
-        </div>
 
+          {contactOpen && (
+            <ContactModal
+              anchorRef={contactBtnRef}
+              onClose={() => setContactOpen(false)}
+            />
+          )}
+        </div>
       </header>
 
-      {/* Breaking news ticker — sticky independent */}
-      <BreakingTicker items={tickerItems && tickerItems.length > 0 ? tickerItems : BREAKING_NEWS} />
+      {settings.showBreakingTicker && (
+        <BreakingTicker items={tickerItems && tickerItems.length > 0 ? tickerItems : BREAKING_NEWS} />
+      )}
 
-      {/* Panou setări — montat via Portal în document.body */}
-      <SettingsPanel
-        isOpen={settingsOpen}
-        onClose={closeSettings}
-      />
+      <SettingsPanel isOpen={settingsOpen} onClose={closeSettings} />
     </>
   );
 }

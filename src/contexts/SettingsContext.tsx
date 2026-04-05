@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Preferințe UI (bias labels, font, ticker etc.). Nu gestionează tema light/dark —
+ * aceasta e pe `<html class="dark">` din layout (script + ThemeToggle).
+ */
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Bias } from "@/types";
 
@@ -9,6 +13,8 @@ export interface SettingsState {
   prismMode: "default" | "compact";
   titleFont: "sans" | "serif";
   showAiPreSummary: boolean;
+  showBlindspots: boolean;
+  showBreakingTicker: boolean;
 }
 
 export const DEFAULT_SETTINGS: SettingsState = {
@@ -17,6 +23,8 @@ export const DEFAULT_SETTINGS: SettingsState = {
   prismMode: "default",
   titleFont: "sans",
   showAiPreSummary: true,
+  showBlindspots: false,
+  showBreakingTicker: false,
 };
 
 const LABEL_MAPS: Record<SettingsState["labelStyle"], Record<Bias, string>> = {

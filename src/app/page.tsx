@@ -1,6 +1,5 @@
 import { Header } from "@/components/Header";
-import { BiasLegend } from "@/components/BiasLegend";
-import { NewsPageClient } from "@/components/NewsPageClient";
+import { SpectrumSection } from "@/components/SpectrumSection";
 import { buildClusterRows } from "@/lib/cluster";
 import { fetchLatestArticles } from "@/lib/supabase";
 import { Newspaper, AlertCircle } from "lucide-react";
@@ -31,29 +30,26 @@ export default async function HomePage() {
         {/* Page intro */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Newspaper size={16} className="text-purple-600" />
-              <span className="text-xs font-semibold text-purple-600 uppercase tracking-widest">
-                Azi în presă
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="w-1 h-3 bg-slate-900 dark:bg-white" />
+              <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">
+                Daily Briefing
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-              Aceeași știre, trei perspective
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none mb-1">
+              The Perspective Feed
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 capitalize">
-              {today}
+            <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              {today} · Editor&apos;s Selection
             </p>
           </div>
         </div>
 
-        {/* Bias legend */}
-        <BiasLegend />
-
-        {/* Client section: toolbar cu filtru blindspot + grid */}
+        {/* Spectru + feed filtrat */}
         {articles.length === 0 ? (
           <EmptyState />
         ) : (
-          <NewsPageClient rows={rows} totalArticles={articles.length} initialFrom={from24h} />
+          <SpectrumSection rows={rows} totalArticles={articles.length} initialFrom={from24h} />
         )}
       </main>
 
@@ -74,19 +70,16 @@ export default async function HomePage() {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-      <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-        <AlertCircle size={22} className="text-gray-400" />
+      <div className="w-12 h-12 rounded-sm bg-slate-100 dark:bg-gray-800 flex items-center justify-center">
+        <AlertCircle size={22} className="text-slate-400" />
       </div>
       <div>
-        <p className="font-semibold text-gray-700 dark:text-gray-300">
-          Niciun articol disponibil momentan
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
+          No Coverage Detected
         </p>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-          Rulează{" "}
-          <code className="font-mono text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
-            npm run fetch
-          </code>{" "}
-          pentru a popula baza de date sau verifică conexiunea la Supabase.
+        <p className="text-[10px] font-bold text-slate-400 dark:text-gray-500 mt-2 uppercase tracking-widest leading-relaxed">
+          The database is currently empty.<br />
+          Run <code className="bg-slate-900 text-white dark:bg-white dark:text-black px-1">npm run fetch</code> to populate.
         </p>
       </div>
     </div>

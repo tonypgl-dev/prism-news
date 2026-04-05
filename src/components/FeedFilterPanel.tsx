@@ -49,66 +49,66 @@ export function FeedFilterPanel({ counts, regionCounts, filterHook }: Props) {
         aria-expanded={open}
         aria-haspopup="listbox"
         className={`
-          flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+          flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[10px] font-black uppercase tracking-widest
           border transition-all duration-200
           ${open
-            ? "bg-purple-600 border-purple-600 text-white"
+            ? "bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900"
             : activeFilterCount > 0
-            ? "bg-amber-50 dark:bg-amber-900/20 border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-400"
-            : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+            ? "bg-slate-100 dark:bg-slate-800 border-slate-900 dark:border-white text-slate-900 dark:text-white"
+            : "bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
           }
         `}
       >
         <SlidersHorizontal size={12} />
         <span>Feed</span>
         {activeFilterCount > 0 && (
-          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-            open ? "bg-white/20 text-white" : "bg-amber-500 text-white"
+          <span className={`text-[10px] font-bold px-1 py-0.5 rounded-sm ${
+            open ? "bg-white/20 text-white dark:bg-black/20 dark:text-black" : "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
           }`}>
-            -{activeFilterCount}
+            {activeFilterCount}
           </span>
         )}
-        <ChevronDown size={11} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown size={12} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute top-full mt-1.5 right-0 z-40 w-64 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl overflow-hidden">
+        <div className="absolute top-full mt-2 right-0 z-40 w-64 rounded-sm border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-2xl shadow-black/10 overflow-hidden">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100 dark:border-gray-800">
-            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-              Filtrează feed-ul
+          <div className="flex items-center justify-between px-3 h-10 border-b border-gray-100 dark:border-gray-800">
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              Filter Feed
             </span>
             {!isAllSelected && (
               <button
                 onClick={selectAll}
-                className="text-[11px] text-purple-600 dark:text-purple-400 font-semibold hover:underline"
+                className="text-[10px] text-slate-900 dark:text-white font-black uppercase tracking-widest hover:underline decoration-2 underline-offset-2"
               >
-                Selectează toate
+                Reset
               </button>
             )}
           </div>
 
           {/* Interval de date */}
-          <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Calendar size={11} className="text-gray-400" />
-              <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                Interval
+          <div className="px-3 py-3 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar size={12} className="text-slate-400" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                Timeframe
               </span>
             </div>
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-2">
               {DATE_RANGE_OPTIONS.map((opt) => {
                 const isActive = filter.dateRange === opt.key;
                 return (
                   <button
                     key={opt.key}
                     onClick={() => setDateRange(opt.key)}
-                    className={`px-2 py-1.5 rounded-lg text-[11px] font-semibold text-left transition-colors ${
+                    className={`px-2 py-2 rounded-sm text-[10px] font-bold uppercase tracking-widest text-center transition-colors ${
                       isActive
-                        ? "bg-purple-600 text-white"
-                        : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                        : "bg-slate-50 dark:bg-gray-900 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
                     }`}
                   >
                     {opt.label}
@@ -119,7 +119,7 @@ export function FeedFilterPanel({ counts, regionCounts, filterHook }: Props) {
           </div>
 
           {/* Lista categorii */}
-          <ul className="py-1 max-h-80 overflow-y-auto" role="listbox" aria-multiselectable="true">
+          <ul className="py-2 max-h-80 overflow-y-auto" role="listbox" aria-multiselectable="true">
             {CATEGORIES.map((cat) => {
               const isChecked = filter.categories.includes(cat.key);
               const count = counts[cat.key] ?? 0;
@@ -128,10 +128,10 @@ export function FeedFilterPanel({ counts, regionCounts, filterHook }: Props) {
               return (
                 <li key={cat.key}>
                   <div
-                    className={`flex items-center gap-2 px-3 py-1.5 cursor-pointer select-none transition-colors
+                    className={`flex items-center gap-3 px-4 py-2 cursor-pointer select-none transition-colors
                       ${isChecked
-                        ? "hover:bg-gray-50 dark:hover:bg-gray-800"
-                        : "opacity-50 hover:opacity-70 hover:bg-gray-50 dark:hover:bg-gray-800"
+                        ? "hover:bg-slate-50 dark:hover:bg-gray-900"
+                        : "opacity-40 hover:opacity-100 hover:bg-slate-50 dark:hover:bg-gray-900"
                       }
                     `}
                     role="option"
@@ -139,79 +139,56 @@ export function FeedFilterPanel({ counts, regionCounts, filterHook }: Props) {
                     onClick={() => toggleCategory(cat.key)}
                   >
                     {/* Checkbox */}
-                    <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 border transition-colors ${
+                    <div className={`w-3 h-3 rounded-sm flex items-center justify-center shrink-0 border transition-colors ${
                       isChecked
-                        ? "bg-purple-600 border-purple-600"
-                        : "border-gray-300 dark:border-gray-600"
+                        ? "bg-slate-900 border-slate-900 dark:bg-white dark:border-white"
+                        : "border-gray-300 dark:border-gray-700"
                     }`}>
-                      {isChecked && <Check size={10} className="text-white" strokeWidth={3} />}
+                      {isChecked && <Check size={8} className="text-white dark:text-slate-900" strokeWidth={4} />}
                     </div>
 
-                    {/* Emoji + label */}
-                    <span className="text-sm">{cat.emoji}</span>
-                    <span className="flex-1 text-xs font-medium text-gray-700 dark:text-gray-200">
+                    {/* Label */}
+                    <span className="flex-1 text-[11px] font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">
                       {cat.label}
                     </span>
 
                     {/* Count */}
                     {count > 0 && (
-                      <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
+                      <span className="text-[10px] text-slate-400 dark:text-slate-600 font-bold">
                         {count}
                       </span>
-                    )}
-
-                    {/* Expand arrow pentru Regional */}
-                    {isRegional && isChecked && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setRegionalExpanded((v) => !v);
-                        }}
-                        className="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                        aria-label={regionalExpanded ? "Ascunde regiuni" : "Arată regiuni"}
-                      >
-                        <ChevronRight
-                          size={13}
-                          className={`transition-transform duration-200 ${regionalExpanded ? "rotate-90" : ""}`}
-                        />
-                      </button>
                     )}
                   </div>
 
                   {/* Subcategorii regionale */}
                   {isRegional && regionalActive && regionalExpanded && (
-                    <ul className="pl-7 pb-1 border-l-2 border-purple-100 dark:border-purple-900/40 ml-5">
+                    <ul className="pl-8 pb-2 border-l border-slate-200 dark:border-slate-800 ml-5 space-y-1 mt-1">
                       {REGIONS.map((region) => {
                         const isRegionChecked = filter.regions.includes(region.key);
                         const rCount = regionCounts[region.key] ?? 0;
                         return (
                           <li
                             key={region.key}
-                            className={`flex items-center gap-2 px-2 py-1 cursor-pointer select-none rounded transition-colors
+                            className={`flex items-center gap-2 px-2 py-1 cursor-pointer select-none transition-colors
                               ${isRegionChecked
-                                ? "hover:bg-gray-50 dark:hover:bg-gray-800"
-                                : "opacity-50 hover:opacity-70 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                ? "text-slate-900 dark:text-white font-bold"
+                                : "text-slate-400 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-400"
                               }
                             `}
                             role="option"
                             aria-selected={isRegionChecked}
                             onClick={() => toggleRegion(region.key)}
                           >
-                            <div className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 border transition-colors ${
+                            <div className={`w-2.5 h-2.5 rounded-sm flex items-center justify-center shrink-0 border transition-colors ${
                               isRegionChecked
-                                ? "bg-purple-500 border-purple-500"
-                                : "border-gray-300 dark:border-gray-600"
+                                ? "bg-slate-900 border-slate-900 dark:bg-white dark:border-white"
+                                : "border-gray-300 dark:border-gray-700"
                             }`}>
-                              {isRegionChecked && <Check size={9} className="text-white" strokeWidth={3} />}
+                              {isRegionChecked && <Check size={7} className="text-white dark:text-slate-900" strokeWidth={4} />}
                             </div>
-                            <span className="flex-1 text-[11px] text-gray-600 dark:text-gray-300">
+                            <span className="flex-1 text-[10px] uppercase tracking-widest">
                               {region.label}
                             </span>
-                            {rCount > 0 && (
-                              <span className="text-[10px] text-gray-400 dark:text-gray-500">
-                                {rCount}
-                              </span>
-                            )}
                           </li>
                         );
                       })}
@@ -223,14 +200,12 @@ export function FeedFilterPanel({ counts, regionCounts, filterHook }: Props) {
           </ul>
 
           {/* Footer cu buton Aplică */}
-          <div className="border-t border-gray-100 dark:border-gray-800 px-3 py-2">
+          <div className="border-t border-gray-100 dark:border-gray-800 p-3">
             <button
               onClick={() => setOpen(false)}
-              className="w-full py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-colors"
+              className="w-full py-3 rounded-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all"
             >
-              {activeFilterCount > 0
-                ? `Aplică filtrele (${filter.categories.length} categorii)`
-                : "Închide"}
+              Apply Filter
             </button>
           </div>
         </div>

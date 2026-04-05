@@ -10,40 +10,35 @@ interface Props {
 }
 
 export function BlindspotBadge({ row }: Props) {
-  const { biasLabels } = useSettings();
+  const { biasLabels, settings } = useSettings();
   const info = getBlindspot(row);
 
+  if (!settings.showBlindspots) return null;
   if (info.type === "none") return null;
 
   // ── Single-source blindspot (maxim): o singură perspectivă ────
   if (info.type === "single") {
     const c = BIAS_COLORS[info.only];
     return (
-      <div className="flex items-center gap-2 mb-2 flex-wrap">
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
         <span
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold
-                     bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300
-                     border border-amber-300 dark:border-amber-700"
+          className="inline-flex items-center gap-1.5 px-2 py-1 rounded-sm text-[10px] font-black uppercase tracking-widest
+                     bg-slate-900 dark:bg-white text-white dark:text-slate-900 border border-slate-900 dark:border-white"
           title={`Subiect acoperit exclusiv de presa de ${biasLabels[info.only]}`}
         >
-          <AlertTriangle size={11} className="shrink-0" />
-          Blindspot maxim
+          <AlertTriangle size={10} className="shrink-0" />
+          Critical Blindspot
         </span>
 
-        <span className="text-[11px] text-gray-500 dark:text-gray-400">
-          Acoperit exclusiv de
+        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          Covered exclusively by
         </span>
 
         <span
-          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${c.badge}`}
+          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[10px] font-black uppercase tracking-widest border border-gray-200 dark:border-gray-800"
         >
-          <Eye size={10} />
+          <div className="w-1 h-3" style={{ backgroundColor: c.hex }} />
           {biasLabels[info.only]}
-        </span>
-
-        <span className="text-[11px] text-gray-400 dark:text-gray-500">
-          · lipsă:{" "}
-          {info.missing.map((b) => biasLabels[b]).join(", ")}
         </span>
       </div>
     );
@@ -51,18 +46,17 @@ export function BlindspotBadge({ row }: Props) {
 
   // ── Partial blindspot: lipsesc 1-2 perspective ────────────────
   return (
-    <div className="flex items-center gap-2 mb-2 flex-wrap">
+    <div className="flex items-center gap-2 mb-3 flex-wrap">
       <span
-        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold
-                   bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400
-                   border border-amber-200 dark:border-amber-800"
+        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-sm text-[10px] font-black uppercase tracking-widest
+                   bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700"
       >
-        <AlertTriangle size={11} className="shrink-0" />
-        Unghi mort
+        <AlertTriangle size={10} className="shrink-0" />
+        Partial Coverage
       </span>
 
-      <span className="text-[11px] text-gray-500 dark:text-gray-400">
-        Lipsesc perspectivele:
+      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        Missing perspective:
       </span>
 
       {info.missing.map((b) => {
@@ -70,8 +64,9 @@ export function BlindspotBadge({ row }: Props) {
         return (
           <span
             key={b}
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${c.badge} opacity-70`}
+            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[10px] font-black uppercase tracking-widest border border-gray-100 dark:border-gray-800 opacity-60"
           >
+            <div className="w-1 h-3 bg-slate-300 dark:bg-slate-700" />
             {biasLabels[b]}
           </span>
         );

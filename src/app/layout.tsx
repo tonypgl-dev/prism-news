@@ -33,11 +33,15 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ro" className={`${geist.variable} ${playfair.variable} ${barlow.variable} h-full antialiased`} suppressHydrationWarning>
+    <html
+      lang="ro"
+      className={`${geist.variable} ${playfair.variable} ${barlow.variable} h-full antialiased bg-[var(--background)]`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=localStorage.getItem('theme');if(t!=='light')document.documentElement.classList.add('dark')})()`,
+            __html: `(function(){var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t!=='light')})()`,
           }}
         />
       </head>

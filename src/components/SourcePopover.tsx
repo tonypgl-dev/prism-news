@@ -70,31 +70,25 @@ export function SourcePopover({ source, triggerClassName }: Props) {
         <button
           className={`
             group inline-flex items-center gap-1.5 cursor-pointer
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500
-            focus-visible:ring-offset-1 rounded
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
+            focus-visible:ring-offset-1 rounded-sm
             ${triggerClassName ?? ""}
           `}
           aria-label={`Informații despre sursa ${source.name}`}
         >
           {/* Dot bias */}
-          <span className={`w-2 h-2 rounded-full shrink-0 ${colors.dot}`} />
+          <span className="w-1.5 h-3 shrink-0" style={{ backgroundColor: colors.hex }} />
           {/* Nume sursă */}
           <span
             className={`
-              text-xs font-semibold uppercase tracking-wide
-              text-gray-500 dark:text-gray-400
-              group-hover:${colors.text.replace("text-", "text-")}
-              group-hover:underline decoration-dotted underline-offset-2
+              text-[10px] font-black uppercase tracking-widest
+              text-slate-500 dark:text-slate-400
+              group-hover:text-slate-900 dark:group-hover:text-white
               transition-colors
             `}
           >
             {source.name}
           </span>
-          {/* Iconiță discretă info */}
-          <Info
-            size={10}
-            className="text-gray-300 dark:text-gray-600 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition-colors"
-          />
         </button>
       </Popover.Trigger>
 
@@ -104,34 +98,30 @@ export function SourcePopover({ source, triggerClassName }: Props) {
           align="start"
           sideOffset={8}
           className={`
-            z-50 w-72 rounded-xl border shadow-xl
-            bg-white dark:bg-gray-900
-            border-gray-200 dark:border-gray-700
-            p-4 space-y-3
+            z-50 w-72 rounded-sm border shadow-2xl shadow-black/20
+            bg-white dark:bg-gray-950
+            border-gray-200 dark:border-gray-800
+            p-4 space-y-4
             animate-in fade-in-0 zoom-in-95
-            data-[side=bottom]:slide-in-from-top-2
-            data-[side=top]:slide-in-from-bottom-2
           `}
         >
           {/* Header */}
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center gap-2">
               <div
-                className={`w-2 h-2 rounded-full ${colors.dot}`}
+                className="w-1 h-4"
+                style={{ backgroundColor: colors.hex }}
               />
-              <span className="font-bold text-sm text-gray-900 dark:text-white">
+              <span className="font-black text-xs uppercase tracking-widest text-slate-900 dark:text-white">
                 {source.name}
               </span>
             </div>
             <span
-              className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${colors.badge}`}
+              className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-400"
             >
               {biasLabels[source.bias as Bias]}
             </span>
           </div>
-
-          {/* Separator */}
-          <div className="border-t border-gray-100 dark:border-gray-800" />
 
           {hasOwnershipData ? (
             <div className="space-y-2.5">

@@ -205,7 +205,7 @@ export function AdminPostsClient() {
 
   if (!saved) {
     return (
-      <div className="max-w-md mx-auto mt-16 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-sm">
+      <div className="max-w-md mx-auto mt-16 rounded-sm border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-sm">
         <h1 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
           Admin · Postări sociale
         </h1>
@@ -280,7 +280,7 @@ export function AdminPostsClient() {
             {candidates.map((row) => (
               <li
                 key={row.cluster_id}
-                className="rounded-xl border border-gray-200 dark:border-gray-800 p-3 bg-white/80 dark:bg-gray-900/80"
+                className="rounded-sm border border-gray-200 dark:border-gray-800 p-3 bg-white/80 dark:bg-gray-900/80"
               >
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2">
                   {rowTitle(row)}
@@ -318,7 +318,7 @@ export function AdminPostsClient() {
               return (
                 <li
                   key={p.id}
-                  className="rounded-xl border border-gray-200 dark:border-gray-800 p-4 bg-white/80 dark:bg-gray-900/80"
+                  className="rounded-sm border border-gray-200 dark:border-gray-800 p-4 bg-white/80 dark:bg-gray-900/80"
                 >
                   <div className="flex justify-between gap-2 mb-2">
                     <span className="text-xs font-bold uppercase text-gray-500">

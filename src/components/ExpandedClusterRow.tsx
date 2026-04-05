@@ -27,43 +27,36 @@ export function ExpandedClusterRow({ row, onCollapse }: Props) {
       transition={{ duration: 0.38, ease: [0.4, 0, 0.2, 1] }}
       className="overflow-hidden"
     >
-      <div className="rounded-2xl border border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20 p-4 mt-1">
+      <div className="rounded-sm border border-gray-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 p-4 mt-2">
 
         {/* Header row: titlu + buton collapse */}
-        <div className="flex items-center justify-between mb-3 gap-2">
-          <span className="text-xs font-bold text-purple-700 dark:text-purple-400 uppercase tracking-widest">
-            ✨ Trei Perspective
-          </span>
+        <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">
+          <div className="flex items-center gap-2">
+            <Sparkles size={12} className="text-slate-900 dark:text-white" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
+              Full Spectrum Perspective
+            </span>
+          </div>
           <button
             onClick={onCollapse}
-            aria-label="Închide perspectivele"
-            className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1"
           >
-            <X size={13} />
-            Restrânge
+            <X size={12} />
+            Close
           </button>
         </div>
 
-        {/* Blindspot + Prism bar */}
-        <BlindspotBadge row={row} />
-        <div className="mb-3">
-          <StoryBiasBar
-            row={row}
-            storyTitle={(row.left ?? row.center ?? row.right)?.title}
-          />
-        </div>
-
         {/* Column headers */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
           {COLUMNS.map((bias) => {
             const c = BIAS_COLORS[bias];
             return (
               <div
                 key={bias}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${c.border} ${c.bg}`}
+                className="flex items-center gap-3 px-3 py-2 rounded-sm border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900"
               >
-                <div className={`w-2 h-2 rounded-full ${c.dot}`} />
-                <span className={`text-[11px] font-bold uppercase tracking-widest ${c.text}`}>
+                <div className="w-1 h-3 shrink-0" style={{ backgroundColor: c.hex }} />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
                   {biasLabels[bias]}
                 </span>
               </div>

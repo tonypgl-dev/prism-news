@@ -71,13 +71,13 @@ export function StoryBiasBar({ row, storyTitle }: Props) {
 
   return (
     <div
-      className="relative mb-3"
+      className="relative mb-4"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* ── Bară subțire ─────────────────────────────────────────── */}
       <div
-        className="flex w-full h-1.5 rounded-full overflow-hidden gap-px"
+        className="flex w-full h-1 rounded-sm overflow-hidden gap-px bg-gray-100 dark:bg-gray-800"
         aria-label={`Distribuție bias: ${tooltipParts}`}
         role="img"
       >
@@ -96,20 +96,20 @@ export function StoryBiasBar({ row, storyTitle }: Props) {
       {/* ── Tooltip la hover ─────────────────────────────────────── */}
       <div
         className={`
-          absolute left-0 top-4 z-20
-          flex flex-col gap-1
-          px-3 py-2 rounded-lg shadow-lg
-          bg-gray-900 dark:bg-gray-800
-          border border-gray-700
+          absolute left-0 top-3 z-20
+          flex flex-col gap-2
+          px-3 py-2 rounded-sm shadow-2xl shadow-black/20
+          bg-white dark:bg-gray-950
+          border border-gray-200 dark:border-gray-800
           pointer-events-none
           transition-all duration-150
           ${hovered ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"}
         `}
-        style={{ minWidth: "220px" }}
+        style={{ minWidth: "240px" }}
       >
         {/* Titlu subiect */}
         {storyTitle && (
-          <p className="text-[10px] text-gray-400 font-medium truncate max-w-xs">
+          <p className="text-[10px] text-slate-900 dark:text-white font-black uppercase tracking-widest truncate max-w-xs">
             {storyTitle}
           </p>
         )}
@@ -119,15 +119,9 @@ export function StoryBiasBar({ row, storyTitle }: Props) {
           {segments.map((bias) => (
             <span
               key={bias}
-              className={`
-                inline-flex items-center gap-1
-                px-1.5 py-0.5 rounded text-[10px] font-bold
-                ${BAR_COLORS[bias].tooltip} ${BAR_COLORS[bias].label}
-              `}
+              className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white"
             >
-              <span
-                className="inline-block w-1.5 h-1.5 rounded-full bg-white/40"
-              />
+              <div className="w-1 h-3" style={{ backgroundColor: BAR_COLORS[bias].bar }} />
               {dist[bias]}% {biasLabels[bias]}
             </span>
           ))}
@@ -137,8 +131,8 @@ export function StoryBiasBar({ row, storyTitle }: Props) {
         <p
           className={`text-[10px] ${
             missing.length > 0
-              ? "text-amber-400"
-              : "text-green-400"
+              ? "text-amber-700 dark:text-amber-400"
+              : "text-green-700 dark:text-green-400"
           }`}
         >
           {missing.length > 0 ? "⚠ " : "✓ "}

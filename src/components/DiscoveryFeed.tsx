@@ -6,14 +6,12 @@ import { Sparkles } from "lucide-react";
 import type { ClusterRow, Bias } from "@/types";
 import { FeedCard } from "./FeedCard";
 import { usePersonalization } from "@/lib/usePersonalization";
+import type { BiasFilter } from "./SpectrumSection";
 
 const BIAS_PRIORITY: Bias[] = ["center", "left", "right"];
 
-/**
- * Alege articolul „reprezentativ" dintr-un cluster pentru feed:
- * preferă centru → stânga → dreapta.
- */
-function pickRepresentative(row: ClusterRow) {
+function pickRepresentative(row: ClusterRow, biasFilter: BiasFilter) {
+  if (biasFilter !== "all" && row[biasFilter]) return row[biasFilter]!;
   for (const b of BIAS_PRIORITY) {
     if (row[b]) return row[b]!;
   }
@@ -22,9 +20,10 @@ function pickRepresentative(row: ClusterRow) {
 
 interface Props {
   rows: ClusterRow[];
+  biasFilter?: BiasFilter;
 }
 
-export function DiscoveryFeed({ rows }: Props) {
+export function DiscoveryFeed({ rows, biasFilter = "all" }: Props) {
   const { sortRows, recordClick, hasPersonalization } = usePersonalization();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -54,11 +53,11 @@ export function DiscoveryFeed({ rows }: Props) {
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800"
+            className="flex items-center gap-2 px-3 py-2 rounded-sm bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
           >
-            <Sparkles size={13} className="text-purple-500 fill-purple-500 shrink-0" />
-            <p className="text-[11px] text-purple-700 dark:text-purple-300">
-              Feed personalizat după interesele tale. Subiectele accesate recent apar primele.
+            <Sparkles size={12} className="text-slate-900 dark:text-white shrink-0" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400">
+              Personalized Feed · Based on your recent activity
             </p>
           </motion.div>
         )}
@@ -67,7 +66,7 @@ export function DiscoveryFeed({ rows }: Props) {
       {/* Lista de carduri */}
       <AnimatePresence mode="popLayout">
         {orderedRows.map((row, index) => {
-          const article = pickRepresentative(row);
+          const article = pickRepresentative(row, biasFilter);
           if (!article) return null;
 
           return (

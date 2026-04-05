@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { AlertTriangle, List, Rows3, Lock, X, Sparkles, Loader2 } from "lucide-react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { AlertTriangle, List, Rows3, Lock, X, Sparkles, Loader2, Clock, Flame } from "lucide-react";
 import { useFreemium } from "@/hooks/useFreemium";
+import { useSettings } from "@/hooks/useSettings";
 import type { ClusterRow } from "@/types";
 import { AlignedGrid } from "./AlignedGrid";
 import { DiscoveryFeed } from "./DiscoveryFeed";
@@ -16,6 +17,7 @@ import {
   type CategoryKey,
   type RegionKey,
 } from "@/lib/categories";
+import type { BiasFilter } from "./SpectrumSection";
 
 type ViewMode = "discovery" | "aligned";
 
@@ -23,13 +25,17 @@ interface Props {
   rows: ClusterRow[];
   totalArticles: number;
   initialFrom: string;
+  biasFilter?: BiasFilter;
+  toolbarPrefix?: React.ReactNode;
 }
 
-export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom }: Props) {
+export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, biasFilter = "all", toolbarPrefix }: Props) {
   const [mode, setMode] = useState<ViewMode>("discovery");
+  const [sortMode, setSortMode] = useState<"recent" | "popular">("recent");
   const [blindspotOnly, setBlindspotOnly] = useState(false);
   const [upsellOpen, setUpsellOpen] = useState(false);
   const { isPremium, daysUsed, isLoaded } = useFreemium();
+  const { settings } = useSettings();
 
   // ── Infinite scroll state ────────────────────────────────────────────
   const [rows, setRows] = useState<ClusterRow[]>(initialRows);
@@ -121,11 +127,6 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom }
   // ── Stats ─────────────────────────────────────────────────────────────
   const blindspotCount = useMemo(() => rows.filter(isBlindspot).length, [rows]);
 
-  const spectrumDist = useMemo(() => ({
-    left:   rows.filter((r) => r.left   !== null).length,
-    center: rows.filter((r) => r.center !== null).length,
-    right:  rows.filter((r) => r.right  !== null).length,
-  }), [rows]);
 
   // ── Filtrare categorii ────────────────────────────────────────────────
   const rowsWithCategory = useMemo(() =>
@@ -168,73 +169,85 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom }
       .map(({ row }) => row),
   [rowsWithCategory, filter]);
 
-  const visibleRows = useMemo(
-    () => (blindspotOnly ? filteredRows.filter(isBlindspot) : filteredRows),
-    [filteredRows, blindspotOnly]
+  const biasFilteredRows = useMemo(
+    () => biasFilter === "all" ? filteredRows : filteredRows.filter((r) => r[biasFilter] !== null),
+    [filteredRows, biasFilter]
   );
+
+  const sortedRows = useMemo(() => {
+    const base = blindspotOnly ? biasFilteredRows.filter(isBlindspot) : biasFilteredRows;
+    if (sortMode === "popular") {
+      return [...base].sort((a, b) => {
+        const scoreA = (a.left ? 1 : 0) + (a.center ? 1 : 0) + (a.right ? 1 : 0);
+        const scoreB = (b.left ? 1 : 0) + (b.center ? 1 : 0) + (b.right ? 1 : 0);
+        return scoreB - scoreA;
+      });
+    }
+    // "recent" — ordinea default e deja DESC published_at din server
+    return base;
+  }, [biasFilteredRows, blindspotOnly, sortMode]);
+
+  const visibleRows = sortedRows;
 
   return (
     <>
       {/* ── Banner freemium ───────────────────────────────────────── */}
       {isLoaded && !isPremium && (
-        <div className="bg-violet-950/60 dark:bg-violet-950/80 border border-violet-700/50 rounded-xl px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs text-violet-200">
-            <Lock size={14} className="text-violet-400 shrink-0" />
+        <div className="bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/50 rounded-sm px-4 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-xs text-slate-950 dark:text-slate-200">
+            <Lock size={14} className="text-slate-600 dark:text-slate-400 shrink-0" />
             <span>
               Ai folosit Prisma News {daysUsed} zile.
-              <span className="font-bold text-violet-300"> Vizualizarea aliniată și filtrele avansate sunt dezactivate.</span>
+              <span className="font-bold text-slate-800 dark:text-slate-300"> Vizualizarea aliniată și filtrele avansate sunt dezactivate.</span>
             </span>
           </div>
-          <button className="text-xs font-bold text-violet-300 hover:text-white underline underline-offset-2 transition-colors whitespace-nowrap">
+          <button className="text-xs font-bold text-slate-800 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white underline underline-offset-2 transition-colors whitespace-nowrap">
             Păstrează accesul · 39 lei/lună →
           </button>
         </div>
       )}
 
       {/* ── Toolbar ──────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2">
 
-        {/* Zona stângă — informațional */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">
-            {filteredRows.length}{rows.length !== filteredRows.length ? ` / ${rows.length}` : ""} subiecte
+        {/* Blindspot badge — doar dacă e activ */}
+        {settings.showBlindspots && blindspotCount > 0 && (
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 shrink-0">
+            {blindspotCount} Blindspots detected
           </span>
-          <span className="text-xs text-gray-400">·</span>
-          <div className="flex gap-1">
-            <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-              {spectrumDist.left}
-            </span>
-            <span className="bg-slate-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-              {spectrumDist.center}
-            </span>
-            <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-              {spectrumDist.right}
-            </span>
-          </div>
-          {blindspotCount > 0 && (
-            <>
-              <span className="text-xs text-gray-400">·</span>
-              <span className="text-xs text-amber-600 dark:text-amber-400">{blindspotCount} blindspot-uri</span>
-            </>
-          )}
-        </div>
+        )}
 
-        {/* Zona dreaptă — acțiuni */}
+        {/* Toate acțiunile pe un singur rând, împinse la dreapta */}
         <div className="flex items-center gap-2 ml-auto">
+
+          {/* Prefix injectat (ex: SpectrumOrb) */}
+          {toolbarPrefix}
+
+          {/* Sort toggle */}
+          <button
+            onClick={() => setSortMode(sortMode === "recent" ? "popular" : "recent")}
+            className="inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-sm text-xs font-semibold
+                       bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-slate-300
+                       hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors shrink-0"
+            style={{ width: 82 }}
+          >
+            {sortMode === "recent" ? <Clock size={12} /> : <Flame size={12} />}
+            {sortMode === "recent" ? "Recente" : "Populare"}
+          </button>
 
           {/* View mode toggle */}
           <div
-            className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 gap-1 shrink-0"
+            className="flex items-center bg-slate-100 dark:bg-gray-800 rounded-sm p-1 gap-1 shrink-0"
             role="group"
             aria-label="Mod de afișare"
           >
             <button
               onClick={() => setMode("discovery")}
               aria-pressed={mode === "discovery"}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-semibold transition-all duration-200 ${
                 mode === "discovery"
-                  ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                  ? "bg-[var(--card)] dark:bg-gray-900 text-slate-900 dark:text-slate-100 shadow-sm"
+                  : "text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200"
               }`}
             >
               <List size={13} />
@@ -243,12 +256,12 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom }
             <button
               onClick={() => isPremium ? setMode("aligned") : setUpsellOpen(true)}
               aria-pressed={mode === "aligned"}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-semibold transition-all duration-200 ${
                 mode === "aligned"
-                  ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                  ? "bg-[var(--card)] dark:bg-gray-900 text-slate-900 dark:text-slate-100 shadow-sm"
                   : !isPremium && isLoaded
-                  ? "text-violet-400 dark:text-violet-400 hover:text-violet-300"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                  ? "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                  : "text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200"
               }`}
             >
               <Rows3 size={13} />
@@ -261,18 +274,18 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom }
           <FeedFilterPanel counts={categoryCounts} regionCounts={regionCounts} filterHook={feedFilter} />
 
           {/* Filtru Blindspot */}
-          {isPremium && (
+          {isPremium && settings.showBlindspots && (
             <button
               onClick={() => setBlindspotOnly((v) => !v)}
               aria-pressed={blindspotOnly}
               className={`
-                inline-flex items-center gap-2 px-4 py-2 rounded-lg
+                inline-flex items-center gap-2 px-4 py-2 rounded-sm
                 text-xs font-bold border transition-all duration-200 shrink-0
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500
                 ${
                   blindspotOnly
                     ? "bg-amber-500 border-amber-500 text-white shadow-md shadow-amber-200 dark:shadow-amber-900/40"
-                    : "bg-white dark:bg-gray-900 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                    : "bg-[var(--card)] dark:bg-gray-900 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
                 }
               `}
             >
@@ -283,7 +296,7 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom }
                 <>
                   <span>Blindspot-uri</span>
                   {blindspotCount > 0 && (
-                    <span className="bg-amber-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                    <span className="bg-amber-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
                       {blindspotCount}
                     </span>
                   )}
@@ -306,16 +319,16 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom }
 
       {/* ── Banner blindspot ──────────────────────────────────────── */}
       {isPremium && blindspotOnly && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-          <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 px-4 py-3 rounded-sm bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <AlertTriangle size={16} className="text-slate-900 dark:text-white shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white leading-tight">
               {visibleRows.length === 0
-                ? "Niciun blindspot detectat astăzi"
-                : `${visibleRows.length} subiect${visibleRows.length === 1 ? "" : "e"} ignorate de cel puțin o tabără editorială`}
+                ? "No Blindspots Detected Today"
+                : `${visibleRows.length} Story Cluster${visibleRows.length === 1 ? "" : "s"} with Editorial Gaps`}
             </p>
-            <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">
-              Citește critic. Subiectele de mai jos lipsesc din cel puțin o parte a spectrului.
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">
+              Read critically. These stories are being ignored by at least one side of the spectrum.
             </p>
           </div>
         </div>
@@ -325,7 +338,7 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom }
       {visibleRows.length === 0 && blindspotOnly ? (
         <EmptyBlindspot onReset={() => setBlindspotOnly(false)} />
       ) : mode === "discovery" ? (
-        <DiscoveryFeed rows={visibleRows} />
+        <DiscoveryFeed rows={visibleRows} biasFilter={biasFilter} />
       ) : (
         <AlignedGrid rows={visibleRows} />
       )}
@@ -354,48 +367,48 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom }
           onClick={() => setUpsellOpen(false)}
         >
           <div
-            className="relative w-full max-w-md rounded-2xl bg-gray-950 border border-violet-700/50 p-6 shadow-2xl shadow-violet-900/30"
+            className="relative w-full max-w-md rounded-sm bg-white dark:bg-gray-950 border border-slate-200 dark:border-slate-800 p-6 shadow-2xl shadow-black/20"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setUpsellOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-800 dark:text-gray-500 dark:hover:text-white transition-colors"
               aria-label="Închide"
             >
               <X size={18} />
             </button>
 
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-violet-600/20 border border-violet-500/30 mb-4">
-              <Sparkles size={22} className="text-violet-400" />
+            <div className="flex items-center justify-center w-12 h-12 rounded-sm bg-slate-900 dark:bg-white border border-slate-900 dark:border-white mb-4">
+              <Sparkles size={22} className="text-white dark:text-slate-900" />
             </div>
 
-            <h2 className="text-lg font-bold text-white mb-1">
-              Vizualizarea Aliniată este Premium
+            <h2 className="text-lg font-black uppercase tracking-tight text-slate-900 dark:text-slate-100 mb-1">
+              Prism View Premium Access
             </h2>
-            <p className="text-sm text-gray-400 mb-4 leading-relaxed">
-              Modul <span className="text-white font-semibold">Aliniat</span> îți arată aceeași știre din
+            <p className="text-sm text-slate-600 dark:text-gray-400 mb-4 leading-relaxed">
+              Modul <span className="text-slate-900 dark:text-slate-100 font-bold">Aliniat</span> îți arată aceeași știre din
               perspectiva presei de stânga, centru și dreapta — pe același rând, față în față.
-              Ai folosit Prisma News <span className="text-violet-300 font-semibold">{daysUsed} zile</span> din cele 3 gratuite.
+              Ai folosit Prisma News <span className="text-slate-900 dark:text-slate-100 font-bold">{daysUsed} zile</span> din cele 3 gratuite.
             </p>
 
-            <ul className="space-y-2 mb-5">
+            <ul className="space-y-3 mb-6">
               {[
                 "Prism View — 3 coloane aliniate per subiect",
                 "Filtre Blindspot — știri ignorate de o tabără",
                 "Acces nelimitat la arhiva de clustere",
               ].map((f) => (
-                <li key={f} className="flex items-center gap-2 text-xs text-gray-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0" />
+                <li key={f} className="flex items-center gap-3 text-xs font-bold uppercase tracking-wide text-slate-700 dark:text-gray-300">
+                  <div className="w-1.5 h-3 bg-slate-900 dark:bg-white shrink-0" />
                   {f}
                 </li>
               ))}
             </ul>
 
-            <button className="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm transition-colors">
-              Activează Premium · 39 lei/lună
+            <button className="w-full py-4 rounded-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 font-black uppercase tracking-widest text-xs transition-all">
+              Activate Premium · 39 RON/Month
             </button>
-            <p className="text-center text-[11px] text-gray-600 mt-2">
-              Anulezi oricând · Fără abonament automat
+            <p className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-gray-600 mt-3">
+              No automatic subscription · Cancel anytime
             </p>
           </div>
         </div>
@@ -407,17 +420,17 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom }
 function EmptyBlindspot({ onReset }: { onReset: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-      <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-        <AlertCircle size={18} className="text-green-500" />
+      <div className="w-10 h-10 rounded-sm bg-slate-900 dark:bg-white flex items-center justify-center">
+        <AlertCircle size={18} className="text-white dark:text-slate-900" />
       </div>
-      <p className="font-semibold text-gray-700 dark:text-gray-300 text-sm">
-        Presa acoperă echilibrat toate subiectele astăzi!
+      <p className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
+        Balanced Coverage Detected
       </p>
       <button
         onClick={onReset}
-        className="text-xs text-purple-600 dark:text-purple-400 underline underline-offset-2"
+        className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors underline underline-offset-4"
       >
-        Înapoi la toate știrile
+        View All Stories
       </button>
     </div>
   );

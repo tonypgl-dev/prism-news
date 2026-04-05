@@ -13,6 +13,7 @@ import {
   Languages,
   Type,
   Zap,
+  AlertTriangle,
 } from "lucide-react";
 import { createPortal } from "react-dom";
 import { DEFAULT_SETTINGS, type SettingsState } from "@/contexts/SettingsContext";
@@ -58,18 +59,17 @@ function Toggle({
       id={id}
       onClick={() => onChange(!checked)}
       className={`
-        relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center
-        rounded-full border-2 border-transparent transition-colors duration-200
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2
-        focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-950
-        ${checked ? "bg-purple-600" : "bg-gray-300 dark:bg-gray-600"}
+        relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center
+        rounded-sm transition-colors duration-200
+        focus:outline-none
+        ${checked ? "bg-slate-900 dark:bg-slate-100" : "bg-gray-300 dark:bg-gray-700"}
       `}
     >
       <span
         className={`
-          pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm
+          pointer-events-none inline-block h-3 w-3 bg-white dark:bg-slate-900 shadow-sm
           transition-transform duration-200
-          ${checked ? "translate-x-4" : "translate-x-0"}
+          ${checked ? "translate-x-4.5" : "translate-x-0.5"}
         `}
       />
     </button>
@@ -89,15 +89,15 @@ function SettingRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-3">
+    <div className="flex items-start justify-between gap-4 py-4 border-b border-gray-100 dark:border-gray-800 last:border-0">
       <div className="flex items-start gap-3 min-w-0">
-        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
-          <Icon size={14} className="text-gray-500 dark:text-gray-400" />
+        <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center bg-slate-100 dark:bg-gray-800 rounded-sm">
+          <Icon size={14} className="text-slate-600 dark:text-slate-400" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{label}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-900 dark:text-slate-100">{label}</p>
           {description && (
-            <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-500 leading-normal">
               {description}
             </p>
           )}
@@ -124,11 +124,11 @@ function DisabledRow({
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
           <Icon size={14} className="text-gray-500 dark:text-gray-400" />
         </div>
-        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{label}</p>
+        <p className="text-sm font-medium text-slate-800 dark:text-gray-200">{label}</p>
       </div>
       <div className="flex items-center gap-2">
         {badge && (
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
             {badge}
           </span>
         )}
@@ -167,8 +167,8 @@ function SegmentedControl<T extends string>({
             focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500
             ${
               value === opt.key
-                ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                ? "bg-white dark:bg-gray-900 text-slate-900 dark:text-slate-100 shadow-sm"
+                : "text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200"
             }
           `}
         >
@@ -280,20 +280,19 @@ function SettingsPanelInner({ isOpen, onClose, settings, onSettingsChange }: Pro
             className={`
               fixed right-0 top-0 bottom-0 z-[70]
               flex flex-col
-              bg-white/90 dark:bg-[#0F1115]/95
-              backdrop-blur-xl
+              bg-white dark:bg-gray-950
               border-l border-gray-200 dark:border-gray-800
-              shadow-2xl shadow-black/20
+              shadow-2xl shadow-black/10
               overflow-hidden
             `}
           >
             {/* ── Header ─────────────────────────────────────────── */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between px-5 h-14 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-600">
-                  <Sparkles size={13} className="text-white fill-white" />
+                <div className="flex h-6 w-6 items-center justify-center bg-slate-900 dark:bg-slate-100 rounded-sm">
+                  <Sparkles size={12} className="text-white dark:text-slate-900" />
                 </div>
-                <h2 className="text-sm font-bold text-gray-900 dark:text-white tracking-tight">
+                <h2 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">
                   Setări Experiență
                 </h2>
               </div>
@@ -301,9 +300,9 @@ function SettingsPanelInner({ isOpen, onClose, settings, onSettingsChange }: Pro
                 ref={closeRef}
                 onClick={onClose}
                 aria-label="Închide setările"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+                className="flex h-8 w-8 items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
@@ -362,6 +361,28 @@ function SettingsPanelInner({ isOpen, onClose, settings, onSettingsChange }: Pro
                   />
                 </SettingRow>
                 <SettingRow
+                  icon={AlertTriangle}
+                  label="Alerte Blindspot"
+                  description="Semnalizează subiectele cu acoperire unilaterală."
+                >
+                  <Toggle
+                    id="toggle-show-blindspots"
+                    checked={settings.showBlindspots}
+                    onChange={(v) => onSettingsChange({ showBlindspots: v })}
+                  />
+                </SettingRow>
+                <SettingRow
+                  icon={Zap}
+                  label="Bara Breaking News"
+                  description="Afișează bara roșie cu știri de ultimă oră în partea de sus."
+                >
+                  <Toggle
+                    id="toggle-breaking-ticker"
+                    checked={settings.showBreakingTicker}
+                    onChange={(v) => onSettingsChange({ showBreakingTicker: v })}
+                  />
+                </SettingRow>
+                <SettingRow
                   icon={Type}
                   label="Font titluri"
                   description="Serif pentru un look editorial clasic, Sans pentru modernitate."
@@ -403,13 +424,13 @@ function SettingsPanelInner({ isOpen, onClose, settings, onSettingsChange }: Pro
                     }
                   >
                     <span
-                      className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                      className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm ${
                         settings.prismMode === "default"
-                          ? "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300"
-                          : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                          ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
+                          : "bg-slate-100 dark:bg-gray-800 text-slate-900 dark:text-white border border-gray-200 dark:border-gray-700"
                       }`}
                     >
-                      {settings.prismMode === "default" ? "Implicit" : "Compact"}
+                      {settings.prismMode === "default" ? "Default" : "Compact"}
                     </span>
                   </SettingRow>
                 </div>

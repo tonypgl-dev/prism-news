@@ -53,7 +53,7 @@ export function isBlindspot(row: ClusterRow): boolean {
 
 export const BIAS_COLORS: Record<
   Bias,
-  { bg: string; border: string; badge: string; text: string; dot: string }
+  { bg: string; border: string; badge: string; text: string; dot: string; hex: string }
 > = {
   left: {
     bg: "bg-blue-50 dark:bg-blue-950/30",
@@ -61,6 +61,7 @@ export const BIAS_COLORS: Record<
     badge: "bg-blue-600 text-white",
     text: "text-blue-700 dark:text-blue-400",
     dot: "bg-blue-500",
+    hex: "#2563eb",
   },
   center: {
     bg: "bg-slate-50 dark:bg-slate-950/30",
@@ -68,6 +69,7 @@ export const BIAS_COLORS: Record<
     badge: "bg-slate-500 text-white",
     text: "text-slate-600 dark:text-slate-400",
     dot: "bg-slate-400",
+    hex: "#64748b",
   },
   right: {
     bg: "bg-red-50 dark:bg-red-950/30",
@@ -75,5 +77,6 @@ export const BIAS_COLORS: Record<
     badge: "bg-red-600 text-white",
     text: "text-red-700 dark:text-red-400",
     dot: "bg-red-500",
+    hex: "#dc2626",
   },
 };

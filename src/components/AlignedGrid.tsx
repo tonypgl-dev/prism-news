@@ -33,10 +33,10 @@ function DesktopGrid({ rows }: Props) {
           return (
             <div
               key={bias}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border ${c.border} ${c.bg}`}
+              className="flex items-center gap-3 px-4 py-3 rounded-sm border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950"
             >
-              <div className={`w-2.5 h-2.5 rounded-full ${c.dot}`} />
-              <span className={`text-xs font-bold uppercase tracking-widest ${c.text}`}>
+              <div className="w-1 h-4 shrink-0" style={{ backgroundColor: c.hex }} />
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
                 {biasLabels[bias]}
               </span>
             </div>
@@ -87,7 +87,7 @@ function MobileGrid({ rows }: Props) {
   return (
     <div className="md:hidden">
       {/* Tabs */}
-      <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 mb-4 bg-gray-100 dark:bg-gray-800 p-1 gap-1">
+      <div className="flex rounded-sm overflow-hidden border border-gray-200 dark:border-gray-800 mb-4 bg-gray-100 dark:bg-gray-900 p-1 gap-1">
         {COLUMNS.map((bias) => {
           const c = BIAS_COLORS[bias];
           const isActive = activeTab === bias;
@@ -95,16 +95,15 @@ function MobileGrid({ rows }: Props) {
             <button
               key={bias}
               onClick={() => setActiveTab(bias)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all duration-200 ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-sm text-[10px] font-black uppercase tracking-widest transition-all duration-200 ${
                 isActive
-                  ? `${c.badge} shadow-sm`
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                  ? "bg-white dark:bg-gray-800 text-slate-900 dark:text-white shadow-sm"
+                  : "text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-slate-300"
               }`}
             >
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  isActive ? "bg-white/80" : c.dot
-                }`}
+              <div 
+                className={`w-1 h-3 transition-opacity ${isActive ? "opacity-100" : "opacity-30"}`} 
+                style={{ backgroundColor: c.hex }} 
               />
               {biasLabels[bias]}
             </button>

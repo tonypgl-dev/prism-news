@@ -24,12 +24,12 @@ export function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label="Comută tema"
-      className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+      className="flex items-center justify-center w-8 h-8 rounded-sm text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
     >
       {dark ? (
-        <Sun size={16} className="text-amber-400" />
+        <Sun size={18} />
       ) : (
-        <Moon size={16} className="text-gray-600" />
+        <Moon size={18} />
       )}
     </button>
   );
