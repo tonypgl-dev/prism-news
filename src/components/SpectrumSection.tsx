@@ -12,6 +12,7 @@ interface Props {
   rows: ClusterRow[];
   totalArticles: number;
   initialFrom: string;
+  featuredClusterId?: string;
 }
 
 function SpectrumOrb({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) {
@@ -38,7 +39,7 @@ function SpectrumOrb({ onClick, isOpen }: { onClick: () => void; isOpen: boolean
   );
 }
 
-export function SpectrumSection({ rows, totalArticles, initialFrom }: Props) {
+export function SpectrumSection({ rows, totalArticles, initialFrom, featuredClusterId }: Props) {
   const [biasFilter, setBiasFilter] = useState<BiasFilter>("all");
   const [legendOpen, setLegendOpen] = useState(false);
 
@@ -70,6 +71,7 @@ export function SpectrumSection({ rows, totalArticles, initialFrom }: Props) {
         initialFrom={initialFrom}
         biasFilter={biasFilter}
         toolbarPrefix={orb}
+        featuredClusterId={featuredClusterId}
       />
     </>
   );

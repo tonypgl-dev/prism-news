@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, List, Rows3, Lock, X, Sparkles, Loader2, ChevronsUp } from "lucide-react";
 import { useFreemium } from "@/hooks/useFreemium";
@@ -29,9 +30,13 @@ interface Props {
   initialFrom: string;
   biasFilter?: BiasFilter;
   toolbarPrefix?: React.ReactNode;
+  featuredClusterId?: string;
 }
 
-export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, biasFilter = "all", toolbarPrefix }: Props) {
+export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, biasFilter = "all", toolbarPrefix, featuredClusterId }: Props) {
+  const router = useRouter();
+  // Latch: reținem featuredClusterId de la primul render (supraviețuiește router.replace)
+  const [pinnedClusterId] = useState<string | undefined>(featuredClusterId);
   const [mode, setMode] = useState<ViewMode>("discovery");
   const [sortMode, setSortMode] = useState<SortOrder>("recent");
   const [blindspotOnly, setBlindspotOnly] = useState(false);
@@ -39,6 +44,14 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
   const [feedControlsOpen, setFeedControlsOpen] = useState(false);
   const { isPremium, daysUsed, isLoaded } = useFreemium();
   const { settings } = useSettings();
+
+  // ── Featured cluster (din link Facebook) ─────────────────────────────
+  useEffect(() => {
+    if (!featuredClusterId) return;
+    setSortMode("recommended");
+    router.replace("/");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [featuredClusterId]);
 
   // ── Infinite scroll state ────────────────────────────────────────────
   const [rows, setRows] = useState<ClusterRow[]>(initialRows);
@@ -378,7 +391,7 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
       {visibleRows.length === 0 && blindspotOnly ? (
         <EmptyBlindspot onReset={() => setBlindspotOnly(false)} />
       ) : mode === "discovery" ? (
-        <DiscoveryFeed rows={visibleRows} biasFilter={biasFilter} sortOrder={sortMode} />
+        <DiscoveryFeed rows={visibleRows} biasFilter={biasFilter} sortOrder={sortMode} featuredClusterId={pinnedClusterId} />
       ) : (
         <AlignedGrid rows={visibleRows} />
       )}

@@ -57,7 +57,7 @@ const parser = new RSSParser({
 // Client Anthropic (lazy — null dacă ANTHROPIC_API_KEY lipsește)
 // ----------------------------------------------------------------
 
-function getAnthropicClient(): Anthropic | null {
+export function getAnthropicClient(): Anthropic | null {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return null;
   return new Anthropic({ apiKey: key });
@@ -119,7 +119,7 @@ async function generateAiSummaries(
 ): Promise<AiSummaries | null> {
   try {
     const message = await client.messages.create({
-      model: "claude-haiku-4-5",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 4096,
       messages: [
         {
@@ -253,7 +253,7 @@ async function processFeed(
 // Pas 3: AI prioritar pentru articole clusterate
 // ----------------------------------------------------------------
 
-async function generateAiForClustered(
+export async function generateAiForClustered(
   supabase: SupabaseClient,
   anthropic: Anthropic,
   newArticleIds: string[]
@@ -337,22 +337,12 @@ export async function runFetchCycle(supabase: SupabaseClient): Promise<CycleStat
     }
   }
 
-  // Pas 3: AI prioritar pentru articole clusterate
-  let aiPriority = 0;
-  if (anthropic && allNewArticles.length > 0) {
-    const ids = allNewArticles.map((a) => a.id);
-    aiPriority = await generateAiForClustered(supabase, anthropic, ids);
-    if (aiPriority > 0) {
-      console.log(`[ai-priority] ✓ ${aiPriority} rezumate AI generate pentru știri clusterate`);
-    }
-  }
-
   return {
     sources: sources.length,
     inserted,
     skipped,
     feedErrors,
-    aiGenerated: aiGenerated + aiPriority,
+    aiGenerated,
     newArticles: allNewArticles,
   };
 }

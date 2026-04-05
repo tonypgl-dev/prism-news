@@ -2,9 +2,9 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Clock, ImageOff, Lock, Zap, Newspaper, Bell, X } from "lucide-react";
+import { ExternalLink, Clock, ImageOff, Lock, Zap, Newspaper, Bell, X, Link2, Check } from "lucide-react";
 import type { Article, ClusterRow, Bias } from "@/types";
-import { timeAgo, BIAS_COLORS } from "@/lib/utils";
+import { timeAgo, BIAS_COLORS, titleToFeaturedSlug } from "@/lib/utils";
 import { useSettings } from "@/hooks/useSettings";
 import { useFreemium } from "@/hooks/useFreemium";
 import { SourcePopover } from "./SourcePopover";
@@ -96,6 +96,17 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
   // ─────────────────────────────────────────────────────────────────
 
   const articleRef = useRef<HTMLElement>(null);
+  const [copied, setCopied] = useState(false);
+
+  function handleCopyLink(e: React.MouseEvent) {
+    e.stopPropagation();
+    const slug = titleToFeaturedSlug(activeArticle.title);
+    const url = `${window.location.origin}/?featured=${slug}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   const colors = BIAS_COLORS[activeBias];
   const siblings = siblingCount(row, article.bias);
@@ -277,14 +288,27 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
                 )}
               </div>
 
-              {isCardExpandable && (
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={(e) => { e.stopPropagation(); onToggle(); }}
-                  className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-white pb-0.5"
+                  onClick={handleCopyLink}
+                  title="Copiază link"
+                  className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors"
                 >
-                  {isExpanded ? <X size={14} strokeWidth={2.5} /> : "Perspectives"}
+                  {copied
+                    ? <Check size={13} strokeWidth={2.5} className="text-green-500" />
+                    : <Link2 size={13} strokeWidth={2.25} />
+                  }
                 </button>
-              )}
+
+                {isCardExpandable && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onToggle(); }}
+                    className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-white pb-0.5"
+                  >
+                    {isExpanded ? <X size={14} strokeWidth={2.5} /> : "Mai multe"}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -21,21 +21,33 @@ interface Props {
   rows: ClusterRow[];
   biasFilter?: BiasFilter;
   sortOrder?: SortOrder;
+  featuredClusterId?: string;
 }
 
-export function DiscoveryFeed({ rows, biasFilter = "all", sortOrder = "recent" }: Props) {
+export function DiscoveryFeed({ rows, biasFilter = "all", sortOrder = "recent", featuredClusterId }: Props) {
   const { sortRows, recordClick } = usePersonalization();
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  // Latch: valoarea inițială supraviețuiește oricăror schimbări ulterioare de prop
+  const [pinnedId] = useState<string | null>(featuredClusterId ?? null);
+  const [expandedId, setExpandedId] = useState<string | null>(featuredClusterId ?? null);
 
   const orderedRows = useMemo(() => {
     const sorted = sortOrder === "recent" ? sortRows(rows) : [...rows];
     const seen = new Set<string>();
-    return sorted.filter((row) => {
+    const deduped = sorted.filter((row) => {
       if (seen.has(row.cluster_id)) return false;
       seen.add(row.cluster_id);
       return true;
     });
-  }, [rows, sortRows, sortOrder]);
+    // Featured cluster trebuie să fie mereu primul
+    if (pinnedId) {
+      const idx = deduped.findIndex((r) => r.cluster_id === pinnedId);
+      if (idx > 0) {
+        const [featured] = deduped.splice(idx, 1);
+        deduped.unshift(featured);
+      }
+    }
+    return deduped;
+  }, [rows, sortRows, sortOrder, pinnedId]);
 
   function handleToggle(clusterId: string) {
     const next = expandedId === clusterId ? null : clusterId;

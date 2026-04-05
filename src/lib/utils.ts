@@ -1,5 +1,23 @@
 import type { Bias, ClusterRow } from "@/types";
 
+/**
+ * Generează un slug URL-friendly din primele N cuvinte ale titlului.
+ * Elimină diacritice, caractere speciale, lowercase + hyphenated.
+ * Ex: "Ciolacu anunță creșterea salariilor bugetare" → "ciolacu-anunta-cresterea-salariilor-bugetare"
+ */
+export function titleToFeaturedSlug(title: string, wordCount = 7): string {
+  return title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w.length > 0)
+    .slice(0, wordCount)
+    .join("-");
+}
+
 export function timeAgo(isoString: string): string {
   const diff = Date.now() - new Date(isoString).getTime();
   const minutes = Math.floor(diff / 60_000);

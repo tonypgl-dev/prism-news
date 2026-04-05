@@ -173,6 +173,21 @@ export async function fetchArticlesPaginated(opts: {
   };
 }
 
+/**
+ * Rezolvă un slug de titlu (ex: "ciolacu-anunta-cresterea") în cluster_id.
+ * Folosește funcția Postgres `find_cluster_by_title_slug` care face unaccent + ilike.
+ * Returnează null dacă nu găsește niciun articol potrivit.
+ */
+export async function fetchClusterIdBySlug(slug: string): Promise<string | null> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase.rpc("find_cluster_by_title_slug", { p_slug: slug });
+  if (error) {
+    console.error("[supabase] fetchClusterIdBySlug:", error.message);
+    return null;
+  }
+  return (data as string) ?? null;
+}
+
 export async function fetchArticlesByClusterId(clusterId: string): Promise<Article[]> {
   const supabase = createServerClient();
   const { data, error } = await supabase

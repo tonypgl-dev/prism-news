@@ -15,7 +15,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, clusterNewArticles } from "@/lib/cluster-server";
-import { runFetchCycle } from "@/lib/fetcher";
+import { runFetchCycle, generateAiForClustered, getAnthropicClient } from "@/lib/fetcher";
 
 // Forțează Node.js runtime (rss-parser nu rulează în Edge)
 export const runtime = "nodejs";
@@ -86,7 +86,17 @@ export async function GET(request: NextRequest) {
       clusterStats = await clusterNewArticles(supabase, cycleStats.newArticles);
     } catch (err) {
       console.error("[cron] Eroare clustering:", err);
-      // Nu returnăm eroare fatală — articolele au fost inserate, doar clustering a eșuat
+    }
+  }
+
+  // ── AI prioritar pentru articolele clusterate (după clustering!) ───
+  let aiPriority = 0;
+  const anthropic = getAnthropicClient();
+  if (anthropic && cycleStats.newArticles.length > 0) {
+    const ids = cycleStats.newArticles.map((a) => a.id);
+    aiPriority = await generateAiForClustered(supabase, anthropic, ids);
+    if (aiPriority > 0) {
+      console.log(`[ai-priority] ✓ ${aiPriority} rezumate AI generate pentru știri clusterate`);
     }
   }
 
@@ -106,7 +116,7 @@ export async function GET(request: NextRequest) {
         inserted: cycleStats.inserted,
         skipped: cycleStats.skipped,
         errors: cycleStats.feedErrors,
-        ai_generated: cycleStats.aiGenerated,
+        ai_generated: cycleStats.aiGenerated + aiPriority,
       },
       clusters: {
         associated: clusterStats.clustered,
