@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Clock, ImageOff, Lock, Zap, Newspaper } from "lucide-react";
+import { ExternalLink, Clock, ImageOff, Lock, Zap, Newspaper, Bell, X } from "lucide-react";
 import type { Article, ClusterRow, Bias } from "@/types";
 import { timeAgo, BIAS_COLORS } from "@/lib/utils";
 import { useSettings } from "@/hooks/useSettings";
@@ -95,6 +95,8 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
   }
   // ─────────────────────────────────────────────────────────────────
 
+  const articleRef = useRef<HTMLElement>(null);
+
   const colors = BIAS_COLORS[activeBias];
   const siblings = siblingCount(row, article.bias);
   const hasCluster = siblings > 0;
@@ -105,15 +107,10 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
   const isCardExpandable = hasAiContent;
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.4), ease: "easeOut" }}
-    >
+    <div>
       {/* ── Card principal ──────────────────────────────────────────── */}
-      <motion.article
-        layout
+      <article
+        ref={articleRef}
         onClick={isCardExpandable ? onToggle : undefined}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -165,10 +162,30 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
               </motion.div>
             </AnimatePresence>
 
+            {/* Sursă + link extern — doar card deschis */}
+            {isExpanded && (
+              <a
+                href={activeArticle.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className={`
+                  absolute z-[5] left-1 flex max-w-[min(calc(100%-0.5rem),9rem)] items-center gap-0.5 rounded-t-sm rounded-br-sm
+                  bg-black/55 px-1 py-px text-[8px] font-medium leading-none text-white backdrop-blur-[2px]
+                  transition-colors hover:bg-black/70 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70
+                  dark:bg-black/50 dark:hover:bg-black/65
+                  ${showBiasLabels ? "bottom-1" : "bottom-0"}
+                `}
+              >
+                <span className="min-w-0 truncate">{activeArticle.source?.name ?? "Sursă"}</span>
+                <ExternalLink size={9} strokeWidth={2.25} className="shrink-0 opacity-85" aria-hidden />
+              </a>
+            )}
+
             {/* Bias Indicator Strip */}
             {showBiasLabels && (
               <div 
-                className="absolute bottom-0 left-0 w-full h-1" 
+                className="absolute bottom-0 left-0 z-[1] w-full h-1" 
                 style={{ backgroundColor: colors.hex }} 
                 title={`Orientare: ${activeBias}`}
               />
@@ -261,11 +278,11 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
               </div>
 
               {isCardExpandable && (
-                <button 
+                <button
                   onClick={(e) => { e.stopPropagation(); onToggle(); }}
                   className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-white pb-0.5"
                 >
-                  {isExpanded ? "Close" : "Perspectives"}
+                  {isExpanded ? <X size={14} strokeWidth={2.5} /> : "Perspectives"}
                 </button>
               )}
             </div>
@@ -296,17 +313,15 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
         )}
 
         {/* ── Cele 3 straturi expandabile ─────────────────────────── */}
-        <AnimatePresence initial={false}>
-          {isExpanded && isCardExpandable && (
-            <motion.div
-              key="ai-layers"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="overflow-hidden"
-            >
-              <div className="px-4 pb-4 pt-1 flex flex-col gap-3 border-t border-gray-100 dark:border-gray-800" onClick={(e) => e.stopPropagation()}>
+        {isCardExpandable && (
+          <div
+            className={`overflow-hidden transition-[max-height,opacity] ease-out ${
+              isExpanded
+                ? "max-h-[800px] opacity-100 duration-300"
+                : "max-h-0 opacity-0 duration-200"
+            }`}
+          >
+              <div className="px-4 pb-4 pt-1 flex flex-col gap-3 border-t border-gray-100 dark:border-gray-800">
 
                 {/* Strat 1 — The Hook (ai_pre_summary) */}
                 {showAiPreSummary && activeArticle.ai_pre_summary && (
@@ -342,25 +357,42 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
                 )}
 
                 {/* CTA Final */}
-                <a
-                  href={activeArticle.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`
-                    self-start inline-flex items-center gap-1.5
-                    px-3 py-1.5 rounded-lg text-xs font-bold
-                    border transition-all duration-200
-                    ${colors.badge} border-transparent
-                    hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
-                  `}
-                >
-                  Citește restul articolului pe {activeArticle.source?.name ?? "sursă"} →
-                  <ExternalLink size={10} />
-                </a>
+                <div className="flex flex-wrap items-center gap-2">
+                  <a
+                    href={activeArticle.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className={`
+                      inline-flex items-center gap-1.5
+                      px-3 py-1.5 rounded-lg text-xs font-bold
+                      border transition-all duration-200
+                      ${colors.badge} border-transparent
+                      hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500
+                    `}
+                  >
+                    Citește restul articolului pe {activeArticle.source?.name ?? "sursă"} →
+                    <ExternalLink size={10} />
+                  </a>
+
+                  {activeArticle.subscription_topic && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // TODO: deschide modal abonare când auth e implementat
+                        alert(`Abonare la: ${activeArticle.subscription_topic}`);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-500 dark:hover:border-slate-400 hover:text-slate-900 dark:hover:text-white transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+                    >
+                      <Bell size={10} />
+                      Abonează-te la știri despre: {activeArticle.subscription_topic}
+                    </button>
+                  )}
+                </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
 
         {/* ── Prism Halo ──────────────────────────────────────────── */}
         <div
@@ -368,7 +400,7 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
           className="absolute bottom-0 left-0 right-0 h-[3px] pointer-events-none"
           style={{ background: haloGradient }}
         />
-      </motion.article>
+      </article>
 
       {/* ── Expansion panel cluster (perspective multiple) ──────── */}
       <AnimatePresence>
@@ -376,6 +408,6 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
           <ExpandedClusterRow row={row} onCollapse={onToggle} />
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

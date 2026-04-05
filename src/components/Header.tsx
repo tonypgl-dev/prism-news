@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useSettings } from "@/hooks/useSettings";
 import { SlidersHorizontal, Mail, X, Send, Search } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
@@ -89,9 +90,11 @@ function ContactModal({ anchorRef, onClose }: {
     >
       {/* Header modal */}
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-2">
-          <Mail size={14} className="text-slate-900 dark:text-white" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Contact Us</span>
+        <div className="flex items-start gap-2 min-w-0 flex-1 pr-2">
+          <Mail size={14} className="text-slate-900 dark:text-white shrink-0 mt-0.5" />
+          <span className="text-[10px] font-bold leading-snug text-slate-900 dark:text-white">
+            Pentru orice întrebare scrie-ne un mesaj și îți vom răspunde îndată.
+          </span>
         </div>
         <button
           onClick={onClose}
@@ -104,28 +107,28 @@ function ContactModal({ anchorRef, onClose }: {
 
       {sent ? (
         <div className="py-4 text-center text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-widest">
-          ✓ Message Prepared
+          ✓ Mesaj trimis
         </div>
       ) : (
         <form onSubmit={handleSend} className="flex flex-col gap-3">
           <input
             type="email"
             required
-            placeholder="YOUR EMAIL"
+            placeholder="Adresa ta de e-mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 text-[11px] font-bold uppercase tracking-widest rounded-sm border border-gray-200 dark:border-gray-800
+            className="w-full px-3 py-2 text-[11px] font-semibold rounded-sm border border-gray-200 dark:border-gray-800
                        bg-white dark:bg-gray-900 text-slate-900 dark:text-white
                        placeholder-slate-300 dark:placeholder-gray-600
                        focus:outline-none focus:border-slate-900 dark:focus:border-white transition-colors"
           />
           <textarea
             required
-            placeholder="YOUR MESSAGE..."
+            placeholder="Mesajul tău…"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 text-[11px] font-bold uppercase tracking-widest rounded-sm border border-gray-200 dark:border-gray-800
+            className="w-full px-3 py-2 text-[11px] font-semibold rounded-sm border border-gray-200 dark:border-gray-800
                        bg-white dark:bg-gray-900 text-slate-900 dark:text-white
                        placeholder-slate-300 dark:placeholder-gray-600
                        focus:outline-none focus:border-slate-900 dark:focus:border-white transition-colors
@@ -140,7 +143,7 @@ function ContactModal({ anchorRef, onClose }: {
             className="flex items-center justify-center gap-2 w-full py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-all rounded-sm"
           >
             <Send size={12} />
-            {loading ? "Sending…" : "Send Message"}
+            {loading ? "Se trimite…" : "Trimite mesajul"}
           </button>
         </form>
       )}
@@ -158,6 +161,7 @@ const LOGO_BEAM_ANIM_MS = 60 + 880;
 const LOGO_BEAM_END_BUFFER_MS = 45;
 
 export function Header({ tickerItems, dateLabel }: HeaderProps) {
+  const router = useRouter();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -222,7 +226,7 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
           <a
             href="/"
             className="relative shrink-0 inline-block logo-scale-mobile isolate max-sm:-ml-[30px] self-center md:[transform:translate3d(0,0,0)]"
-            onClick={() => runLogoLightSequence()}
+            onClick={(e) => { e.preventDefault(); runLogoLightSequence(); router.refresh(); }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logomod.png" alt="Prisma News" style={{ height: "100px", width: "auto", display: "block" }} />

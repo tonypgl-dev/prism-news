@@ -25,6 +25,7 @@ export interface Article {
   original_snippet: string | null;
   ai_pre_summary: string | null;
   ai_summary: string | null;
+  subscription_topic: string | null;
   source?: Source;
 }
 

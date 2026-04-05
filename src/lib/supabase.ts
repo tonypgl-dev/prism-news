@@ -30,6 +30,7 @@ type SupabaseArticle = {
   original_snippet: string | null;
   ai_pre_summary: string | null;
   ai_summary: string | null;
+  subscription_topic: string | null;
   // Supabase returnează join-ul ca array; primul element = sursa articolului
   sources: SupabaseSource[] | null;
 };
@@ -63,7 +64,7 @@ export function createServerClient() {
 const ARTICLE_SELECT = `
   id, source_id, title, summary, link, image_url,
   published_at, bias, cluster_id, original_snippet,
-  ai_pre_summary, ai_summary,
+  ai_pre_summary, ai_summary, subscription_topic,
   sources (
     id, name, logo_url, bias, owner,
     notable_interests, factuality_score, profile_url
@@ -85,6 +86,7 @@ function mapRow(row: SupabaseArticle): Article {
     original_snippet: row.original_snippet,
     ai_pre_summary: row.ai_pre_summary,
     ai_summary: row.ai_summary,
+    subscription_topic: row.subscription_topic,
     source: src
       ? {
           id: src.id,
