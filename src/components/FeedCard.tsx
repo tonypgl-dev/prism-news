@@ -354,7 +354,7 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
                       <Zap size={8} className="fill-white dark:fill-slate-900" />
                       Rezumat AI
                     </span>
-                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
+                    <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 leading-snug">
                       {activeArticle.ai_pre_summary}
                     </p>
                   </div>
@@ -362,7 +362,7 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
 
                 {/* Strat 2 — The Context (ai_summary) */}
                 {activeArticle.ai_summary && (
-                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
                     {activeArticle.ai_summary}
                   </p>
                 )}
@@ -374,7 +374,7 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
                       <Newspaper size={8} />
                       Fragment original · {activeArticle.source?.name ?? "Sursă"}
                     </span>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed italic mt-1">
+                    <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 leading-relaxed italic mt-1">
                       &ldquo;{activeArticle.original_snippet}&rdquo;
                     </p>
                   </div>

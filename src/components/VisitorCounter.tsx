@@ -5,6 +5,8 @@ import { Users } from "lucide-react";
 import { getStoredConsent, type CookieConsentData } from "./CookieConsent";
 
 const STORAGE_KEY = "prisma_visitor_id";
+/** Pentru cei fără analytics: ID în sessionStorage — un vizitator „unic” per sesiune de tab, fără cookie persistent. */
+const SESSION_VISITOR_KEY = "prisma_visitor_session_id";
 
 function generateUUID(): string {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
@@ -17,12 +19,36 @@ function formatCount(n: number): string {
   return n.toLocaleString("ro-RO");
 }
 
-async function registerVisit(): Promise<number | null> {
-  let visitorId = localStorage.getItem(STORAGE_KEY);
-  if (!visitorId) {
-    visitorId = generateUUID();
-    localStorage.setItem(STORAGE_KEY, visitorId);
+async function fetchTotalPublic(): Promise<number | null> {
+  try {
+    const res = await fetch("/api/visit", { method: "GET", cache: "no-store" });
+    const data = (await res.json()) as { total?: number };
+    return typeof data.total === "number" ? data.total : null;
+  } catch {
+    return null;
   }
+}
+
+function getOrCreateVisitorId(usePersistentStorage: boolean): string {
+  if (usePersistentStorage) {
+    let id = localStorage.getItem(STORAGE_KEY);
+    if (!id) {
+      id = generateUUID();
+      localStorage.setItem(STORAGE_KEY, id);
+    }
+    return id;
+  }
+  let sid = sessionStorage.getItem(SESSION_VISITOR_KEY);
+  if (!sid) {
+    sid = generateUUID();
+    sessionStorage.setItem(SESSION_VISITOR_KEY, sid);
+  }
+  return sid;
+}
+
+/** Înregistrează vizitatorul în DB. Analytics ON → localStorage (unic între vizite). Analytics OFF → sessionStorage (unic per sesiune tab). */
+async function registerVisit(usePersistentStorage: boolean): Promise<number | null> {
+  const visitorId = getOrCreateVisitorId(usePersistentStorage);
   try {
     const res = await fetch("/api/visit", {
       method: "POST",
@@ -40,29 +66,30 @@ export function VisitorCounter() {
   const [total, setTotal] = useState<number | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
+    function applyTotal(t: number | null) {
+      if (!cancelled && t !== null) setTotal(t);
+    }
+
+    // Afișăm mereu totalul agregat (GET), fără a depinde de consimțământul pentru analytics.
+    void fetchTotalPublic().then(applyTotal);
+
     const consent = getStoredConsent();
-
-    if (consent?.analytics) {
-      // Consimțământ deja dat → înregistrează imediat
-      registerVisit().then((t) => { if (t !== null) setTotal(t); });
-      return;
-    }
-
     if (consent !== null) {
-      // Consimțământ dat, dar analytics refuzat → nu afișa nimic
-      return;
+      void registerVisit(consent.analytics).then(applyTotal);
     }
 
-    // Nicio decizie încă → așteptăm evenimentul de consent
     function onConsent(e: Event) {
       const detail = (e as CustomEvent<CookieConsentData>).detail;
-      if (detail.analytics) {
-        registerVisit().then((t) => { if (t !== null) setTotal(t); });
-      }
+      void registerVisit(detail.analytics).then(applyTotal);
     }
 
     window.addEventListener("prisma:consent", onConsent);
-    return () => window.removeEventListener("prisma:consent", onConsent);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("prisma:consent", onConsent);
+    };
   }, []);
 
   if (total === null) return null;
