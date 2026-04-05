@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   title: "Prisma News — Știri din toate perspectivele",
   description:
     "Prisma News compară aceeași știre din perspectivele presei de stânga, centru și dreapta pentru a-ți oferi imaginea completă.",
-  metadataBase: new URL("https://prism-news.ro"),
+  metadataBase: new URL("https://prisma-news.ro"),
 };
 
 export default function RootLayout({

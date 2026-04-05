@@ -38,7 +38,26 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     },
   };
 
-  if (!featured) return defaultMeta;
+  if (!featured) {
+    // Preia imaginea celui mai recent articol pentru preview homepage
+    const recent = await fetchLatestArticles({ limit: 10 });
+    const heroImage = recent.find((a) => a.image_url)?.image_url ?? null;
+    return {
+      ...defaultMeta,
+      openGraph: {
+        ...defaultMeta.openGraph as object,
+        images: heroImage
+          ? [{ url: heroImage, width: 1200, height: 630, alt: "Prisma News" }]
+          : undefined,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Prisma News — Știri România din toate perspectivele",
+        description: "Aceeași știre din perspectiva presei de stânga, centru și dreapta.",
+        images: heroImage ? [heroImage] : undefined,
+      },
+    };
+  }
 
   // og:url conține ÎNTOTDEAUNA featured param — indiferent dacă rezoluția reușește
   const featuredUrl = `https://prisma-news.ro/?featured=${featured}`;
