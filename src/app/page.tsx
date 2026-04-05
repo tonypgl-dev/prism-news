@@ -24,27 +24,9 @@ export default async function HomePage() {
 
   return (
     <>
-      <Header tickerItems={tickerItems} />
+      <Header tickerItems={tickerItems} dateLabel={today} />
 
       <main className="flex-1 max-w-screen-xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
-        {/* Page intro */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <div className="w-1 h-3 bg-slate-900 dark:bg-white" />
-              <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">
-                Știrile zilei
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-tight mb-1">
-              Știri din mai multe perspective
-            </h1>
-            <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-              {today}
-            </p>
-          </div>
-        </div>
-
         {/* Spectru + feed filtrat */}
         {articles.length === 0 ? (
           <EmptyState />

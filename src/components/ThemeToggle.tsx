@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
 
+/** Implicit: dark pentru toți; light doar dacă utilizatorul a ales explicit (localStorage theme === "light"). */
 export function ThemeToggle() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const isDark = stored !== "light";
+  useLayoutEffect(() => {
+    const isLight = localStorage.getItem("theme") === "light";
+    const isDark = !isLight;
     setDark(isDark);
     document.documentElement.classList.toggle("dark", isDark);
   }, []);

@@ -10,6 +10,8 @@ import { BREAKING_NEWS } from "@/lib/mock-data";
 
 interface HeaderProps {
   tickerItems?: string[];
+  /** Dată afișată în bara de jos a navbar-ului (ex. ro-RO). */
+  dateLabel?: string;
 }
 
 // ── Modal Contact ─────────────────────────────────────────────────────────────
@@ -154,7 +156,7 @@ const LOGO_PLAIN_MS = 220;
 const LOGO_BEAM_ANIM_MS = 60 + 880;
 const LOGO_BEAM_END_BUFFER_MS = 45;
 
-export function Header({ tickerItems }: HeaderProps) {
+export function Header({ tickerItems, dateLabel }: HeaderProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const { settings } = useSettings();
@@ -205,13 +207,18 @@ export function Header({ tickerItems }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 overflow-visible">
-        <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between gap-4 py-2 md:py-0 md:h-32 overflow-visible">
+      <header
+        className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 overflow-visible
+          bg-gradient-to-r from-slate-600 from-0% via-slate-300 via-[26%] to-white to-[62%]
+          dark:bg-gray-950 dark:bg-none"
+      >
+        <div className="max-w-screen-xl mx-auto px-4">
+        <div className="relative flex items-stretch justify-between gap-4 py-2 md:py-0 md:h-32 overflow-visible">
           
           {/* Logo & Brand — secvență: logo simplu → fascicul conic → efecte raze (flare) */}
           <a
             href="/"
-            className="relative shrink-0 inline-block logo-scale-mobile isolate max-sm:-ml-[30px]"
+            className="relative shrink-0 inline-block logo-scale-mobile isolate max-sm:-ml-[30px] self-center md:[transform:translate3d(0,0,0)]"
             onClick={() => runLogoLightSequence()}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -261,10 +268,10 @@ export function Header({ tickerItems }: HeaderProps) {
               <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"32px", height:"32px", borderRadius:"50%", background:"radial-gradient(circle, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.08) 60%, transparent 100%)", filter:"blur(5px)" }} />
               <div style={{ position:"absolute", transform:"translate(-50%,-50%)", width:"3px", height:"3px", borderRadius:"50%", background:"white", boxShadow:"0 0 3px 1px rgba(255,255,255,0.8)" }} />
             </div>
-            {/* Text cu alfa + blend: peste prisma se vede grafica; pe fundal navbar rămâne citibil */}
+            {/* Text: perspective în același transform ca rotateY — evită artefacte la scroll cu sticky */}
             <div
-              className="absolute pointer-events-none z-[2] mix-blend-multiply dark:mix-blend-soft-light"
-              style={{ top: "-6px", right: "6px", perspective: "200px", perspectiveOrigin: "right center" }}
+              className="absolute pointer-events-none z-[2] mix-blend-multiply dark:mix-blend-soft-light [transform:translateZ(0)]"
+              style={{ top: "-6px", right: "6px" }}
             >
               <span
                 className="font-black uppercase tracking-tight"
@@ -275,7 +282,7 @@ export function Header({ tickerItems }: HeaderProps) {
                   background: "linear-gradient(to right, rgba(26, 58, 92, 0.78), rgba(58, 159, 212, 0.78))",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
-                  transform: "rotateY(-38deg) rotate(2deg)",
+                  transform: "perspective(200px) rotateY(-38deg) rotate(2deg)",
                   transformOrigin: "right center",
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",
@@ -286,8 +293,8 @@ export function Header({ tickerItems }: HeaderProps) {
               </span>
             </div>
             <div
-              className="absolute pointer-events-none z-[10]"
-              style={{ top: "40px", right: "7px", perspective: "100px", perspectiveOrigin: "right center" }}
+              className="absolute pointer-events-none z-[10] [transform:translateZ(0)]"
+              style={{ top: "40px", right: "7px" }}
             >
               <span
                 className="text-[36px] font-black uppercase tracking-tight"
@@ -295,7 +302,7 @@ export function Header({ tickerItems }: HeaderProps) {
                   fontFamily: "var(--font-barlow), sans-serif",
                   lineHeight: 1,
                   color: "#8fa3b1",
-                  transform: "scaleX(1.12) scaleY(0.88) rotateY(-38deg) rotate(10deg)",
+                  transform: "perspective(100px) scaleX(1.12) scaleY(0.88) rotateY(-38deg) rotate(10deg)",
                   transformOrigin: "right center",
                   backfaceVisibility: "hidden",
                   WebkitBackfaceVisibility: "hidden",
@@ -321,8 +328,8 @@ export function Header({ tickerItems }: HeaderProps) {
               }}
             >
               <div
-                className="absolute pointer-events-none"
-                style={{ top: "-6px", right: "6px", perspective: "200px", perspectiveOrigin: "right center" }}
+                className="absolute pointer-events-none [transform:translateZ(0)]"
+                style={{ top: "-6px", right: "6px" }}
               >
                 <span
                   className="font-black uppercase tracking-tight"
@@ -333,7 +340,7 @@ export function Header({ tickerItems }: HeaderProps) {
                     background: "linear-gradient(to right, rgba(26, 58, 92, 0.78), rgba(58, 159, 212, 0.78))",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
-                    transform: "rotateY(-38deg) rotate(2deg)",
+                    transform: "perspective(200px) rotateY(-38deg) rotate(2deg)",
                     transformOrigin: "right center",
                     backfaceVisibility: "hidden",
                     WebkitBackfaceVisibility: "hidden",
@@ -348,32 +355,43 @@ export function Header({ tickerItems }: HeaderProps) {
           </a>
 
           {/* Centru — Nav (Optional) */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-6 self-center">
             <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Top Stories</a>
             <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Perspectives</a>
             <a href="#" className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 cursor-not-allowed">Blindspots</a>
           </nav>
 
-          {/* Acțiuni dreapta */}
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            
-            <button
-              ref={contactBtnRef}
-              onClick={() => setContactOpen((v) => !v)}
-              className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
-              title="Contact"
-            >
-              <Mail size={18} />
-            </button>
+          {/* Dreapta: acțiuni sus, dată jos în același colț */}
+          <div className="flex min-w-0 flex-col items-end justify-between gap-2 shrink-0 py-0.5 md:py-3 self-stretch">
+            <div className="flex items-center gap-3 shrink-0">
+              <ThemeToggle />
 
-            <button
-              onClick={openSettings}
-              className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
-              title="Settings"
-            >
-              <SlidersHorizontal size={18} />
-            </button>
+              <button
+                ref={contactBtnRef}
+                onClick={() => setContactOpen((v) => !v)}
+                className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+                title="Contact"
+              >
+                <Mail size={18} />
+              </button>
+
+              <button
+                onClick={openSettings}
+                className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+                title="Settings"
+              >
+                <SlidersHorizontal size={18} />
+              </button>
+            </div>
+
+            {dateLabel ? (
+              <p
+                className="text-[9px] sm:text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide text-right max-w-[min(100%,11rem)] leading-snug"
+                suppressHydrationWarning
+              >
+                {dateLabel}
+              </p>
+            ) : null}
           </div>
 
           {contactOpen && (
@@ -382,6 +400,7 @@ export function Header({ tickerItems }: HeaderProps) {
               onClose={() => setContactOpen(false)}
             />
           )}
+        </div>
         </div>
       </header>
 

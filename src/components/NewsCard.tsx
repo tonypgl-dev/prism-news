@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Clock, ImageOff } from "lucide-react";
+import { ExternalLink, Clock, ImageOff, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Article, Bias } from "@/types";
 import { timeAgo, BIAS_COLORS } from "@/lib/utils";
@@ -15,6 +15,7 @@ interface Props {
 export function NewsCard({ article, index = 0 }: Props) {
   const colors = BIAS_COLORS[article.bias];
   const { settings } = useSettings();
+  const hasAiSummary = Boolean(article.ai_pre_summary || article.ai_summary);
 
   return (
     <motion.article
@@ -62,15 +63,26 @@ export function NewsCard({ article, index = 0 }: Props) {
       {/* Body */}
       <div className="flex flex-col flex-1 p-4 gap-2.5">
         {/* Source & Time */}
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           {article.source ? (
             <SourcePopover source={article.source} />
           ) : (
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Unknown</span>
           )}
-          <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            <Clock size={10} />
-            <span suppressHydrationWarning>{timeAgo(article.published_at)}</span>
+          <div className="flex items-center gap-2 shrink-0">
+            {hasAiSummary && (
+              <span
+                className="inline-flex items-center justify-center shrink-0 text-[var(--accent)]"
+                title="Include sinteză AI"
+                aria-label="Sinteză AI disponibilă"
+              >
+                <Zap size={14} strokeWidth={2.25} className="fill-[var(--accent)]/25" aria-hidden />
+              </span>
+            )}
+            <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <Clock size={10} />
+              <span suppressHydrationWarning>{timeAgo(article.published_at)}</span>
+            </div>
           </div>
         </div>
 

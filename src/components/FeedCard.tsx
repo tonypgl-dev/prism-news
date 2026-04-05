@@ -243,10 +243,21 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
             </AnimatePresence>
 
             {/* Footer */}
-            <div className="flex items-center justify-between mt-auto pt-1">
-              <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                <Clock size={10} />
-                <span suppressHydrationWarning>{timeAgo(activeArticle.published_at)}</span>
+            <div className="flex items-center justify-between mt-auto pt-1 gap-2">
+              <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 shrink-0">
+                  <Clock size={10} />
+                  <span suppressHydrationWarning>{timeAgo(activeArticle.published_at)}</span>
+                </div>
+                {hasAiSummary && !isExpanded && (
+                  <span
+                    className="inline-flex items-center justify-center shrink-0 text-[var(--accent)]"
+                    title="Include sinteză AI — deschide pentru detalii"
+                    aria-label="Sinteză AI disponibilă"
+                  >
+                    <Zap size={14} strokeWidth={2.25} className="fill-[var(--accent)]/25" aria-hidden />
+                  </span>
+                )}
               </div>
 
               {isCardExpandable && (
@@ -302,7 +313,7 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
                   <div className="flex items-start gap-2">
                     <span className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-widest bg-slate-900 text-white dark:bg-white dark:text-slate-900 mt-0.5">
                       <Zap size={8} className="fill-white dark:fill-slate-900" />
-                      AI Insight
+                      Rezumat AI
                     </span>
                     <p className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
                       {activeArticle.ai_pre_summary}

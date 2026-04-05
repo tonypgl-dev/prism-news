@@ -36,8 +36,8 @@ interface CycleStats {
 }
 
 interface AiSummaries {
-  ai_pre_summary: string;
-  ai_summary: string;
+  ai_pre_summary: string | null;
+  ai_summary: string | null;
 }
 
 // ----------------------------------------------------------------
@@ -79,7 +79,7 @@ function extractOriginalSnippet(raw: string | undefined | null): string | null {
   const text = sanitizeHtml(raw, { allowedTags: [], allowedAttributes: {} })
     .replace(/\s+/g, " ")
     .trim();
-  return text.length > 280 ? text.slice(0, 277) + "…" : text || null;
+  return text.length > 500 ? text.slice(0, 497) + "…" : text || null;
 }
 
 function extractImageUrl(item: RSSParser.Item): string | null {
@@ -119,13 +119,13 @@ async function generateAiSummaries(
   try {
     const message = await client.messages.create({
       model: "claude-haiku-4-5",
-      max_tokens: 200,
+      max_tokens: 4096,
       messages: [
         {
           role: "user",
           content: `Ești un editor de știri român. Pe baza titlului și fragmentului de mai jos, generează în română:
-1. O propoziție de impact de maxim 15 cuvinte (the hook).
-2. O sinteză neutră de context de 280-300 caractere care explică CE s-a întâmplat, fără să preia text din sursă.
+1. O propoziție de impact scurtă (hook) care captează esența știrii.
+2. O sinteză neutră care explică clar CE s-a întâmplat, contextul relevant și de ce contează, fără a copia formulări din sursă. Lungimea rezumatului trebuie să fie potrivită complexității subiectului (poate fi mai lung dacă e nevoie).
 
 Titlu: ${title}
 Fragment: ${snippet}
@@ -143,9 +143,11 @@ Răspunde EXCLUSIV în formatul JSON:
     const parsed = JSON.parse(jsonMatch[0]) as { pre?: string; summary?: string };
     if (!parsed.pre || !parsed.summary) return null;
 
+    const pre = (parsed.pre ?? "").trim();
+    const summary = (parsed.summary ?? "").trim();
     return {
-      ai_pre_summary: parsed.pre.slice(0, 120),
-      ai_summary: parsed.summary.slice(0, 350),
+      ai_pre_summary: pre || null,
+      ai_summary: summary || null,
     };
   } catch {
     return null;

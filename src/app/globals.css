@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* dark: urmează doar clasa .dark pe document, nu prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -86,7 +89,7 @@ body {
 /* Logo mobile scaling */
 @media (max-width: 639px) {
   .logo-scale-mobile {
-    transform: scale(0.64);
+    transform: translate3d(0, 0, 0) scale(0.64);
     transform-origin: left center;
     margin-top: -20px;
     margin-bottom: -20px;

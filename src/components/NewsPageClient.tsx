@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { AlertTriangle, List, Rows3, Lock, X, Sparkles, Loader2, Clock, Flame } from "lucide-react";
+import { AlertTriangle, List, Rows3, Lock, X, Sparkles, Loader2 } from "lucide-react";
 import { useFreemium } from "@/hooks/useFreemium";
 import { useSettings } from "@/hooks/useSettings";
 import type { ClusterRow } from "@/types";
@@ -10,6 +10,7 @@ import { DiscoveryFeed } from "./DiscoveryFeed";
 import { isBlindspot } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
 import { FeedFilterPanel } from "./FeedFilterPanel";
+import { SortOrderDropdown, type SortOrder } from "./SortOrderDropdown";
 import { useFeedFilter, dateRangeToIso } from "@/hooks/useFeedFilter";
 import {
   detectCategory,
@@ -31,7 +32,7 @@ interface Props {
 
 export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, biasFilter = "all", toolbarPrefix }: Props) {
   const [mode, setMode] = useState<ViewMode>("discovery");
-  const [sortMode, setSortMode] = useState<"recent" | "popular">("recent");
+  const [sortMode, setSortMode] = useState<SortOrder>("recent");
   const [blindspotOnly, setBlindspotOnly] = useState(false);
   const [upsellOpen, setUpsellOpen] = useState(false);
   const { isPremium, daysUsed, isLoaded } = useFreemium();
@@ -183,6 +184,27 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
         return scoreB - scoreA;
       });
     }
+    if (sortMode === "recommended") {
+      const perspectives = (r: ClusterRow) =>
+        (r.left ? 1 : 0) + (r.center ? 1 : 0) + (r.right ? 1 : 0);
+      const hasAi = (r: ClusterRow) =>
+        [r.left, r.center, r.right].some(
+          (a) => a && (a.ai_pre_summary || a.ai_summary)
+        );
+      const latestTs = (r: ClusterRow) =>
+        Math.max(
+          0,
+          ...[r.left, r.center, r.right]
+            .filter(Boolean)
+            .map((a) => new Date(a!.published_at).getTime())
+        );
+      return [...base].sort((a, b) => {
+        const sa = perspectives(a) * 1000 + (hasAi(a) ? 100 : 0);
+        const sb = perspectives(b) * 1000 + (hasAi(b) ? 100 : 0);
+        if (sb !== sa) return sb - sa;
+        return latestTs(b) - latestTs(a);
+      });
+    }
     // "recent" — ordinea default e deja DESC published_at din server
     return base;
   }, [biasFilteredRows, blindspotOnly, sortMode]);
@@ -216,19 +238,15 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
           </span>
         )}
 
-        {/* Mobil: două rânduri (spectru + sort + moduri | feed + blindspot); desktop: un rând */}
-        <div className="flex flex-col gap-2 w-full sm:flex-row sm:flex-wrap sm:items-center sm:gap-2 sm:ml-auto sm:w-auto">
-          <div className="flex flex-wrap items-center gap-2 max-sm:w-full">
+        {/* Rând 1: Spectrum + Feed · Rând 2: Sort + Discovery/Aliniat (+ Blindspot) */}
+        <div className="flex flex-col gap-2 w-full sm:ml-auto sm:w-auto sm:items-end">
+          <div className="flex flex-wrap items-center gap-2 w-full justify-start sm:justify-end">
             {toolbarPrefix}
-            <button
-              onClick={() => setSortMode(sortMode === "recent" ? "popular" : "recent")}
-              className="inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-sm text-xs font-semibold
-                         bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-slate-300
-                         hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors shrink-0 min-w-[82px]"
-            >
-              {sortMode === "recent" ? <Clock size={12} /> : <Flame size={12} />}
-              {sortMode === "recent" ? "Recente" : "Populare"}
-            </button>
+            <FeedFilterPanel counts={categoryCounts} regionCounts={regionCounts} filterHook={feedFilter} />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 w-full justify-start sm:justify-end">
+            <SortOrderDropdown value={sortMode} onChange={setSortMode} />
             <div
               className="flex items-center bg-slate-100 dark:bg-gray-800 rounded-sm p-1 gap-1 shrink-0"
               role="group"
@@ -262,10 +280,6 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
                 {!isPremium && isLoaded && <Lock size={10} className="ml-0.5" />}
               </button>
             </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 max-sm:w-full">
-            <FeedFilterPanel counts={categoryCounts} regionCounts={regionCounts} filterHook={feedFilter} />
             {isPremium && settings.showBlindspots && (
               <button
                 onClick={() => setBlindspotOnly((v) => !v)}
@@ -331,7 +345,7 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
       {visibleRows.length === 0 && blindspotOnly ? (
         <EmptyBlindspot onReset={() => setBlindspotOnly(false)} />
       ) : mode === "discovery" ? (
-        <DiscoveryFeed rows={visibleRows} biasFilter={biasFilter} />
+        <DiscoveryFeed rows={visibleRows} biasFilter={biasFilter} sortOrder={sortMode} />
       ) : (
         <AlignedGrid rows={visibleRows} />
       )}
