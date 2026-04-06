@@ -40,6 +40,7 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
   const [blindspotOnly, setBlindspotOnly] = useState(false);
   const [upsellOpen, setUpsellOpen] = useState(false);
   const [feedControlsOpen, setFeedControlsOpen] = useState(false);
+  const [toolbarAnimating, setToolbarAnimating] = useState(false);
   const { isPremium, daysUsed, isLoaded } = useFreemium();
   const { settings } = useSettings();
 
@@ -279,24 +280,15 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ type: "spring", stiffness: 380, damping: 34 }}
-            className="overflow-hidden"
-            style={{ position: "relative", zIndex: 20 }}
-            onAnimationComplete={(def) => {
-              if (def === "animate") {
-                // Permite dropdown-urilor să iasă în afara toolbar-ului
-                const el = document.querySelector("[data-toolbar]") as HTMLElement | null;
-                if (el) el.style.overflow = "visible";
-              }
+            style={{
+              overflow: toolbarAnimating ? "hidden" : "visible",
+              position: "relative",
+              zIndex: 20,
             }}
-            onAnimationStart={() => {
-              const el = document.querySelector("[data-toolbar]") as HTMLElement | null;
-              if (el) el.style.overflow = "hidden";
-            }}
+            onAnimationStart={() => setToolbarAnimating(true)}
+            onAnimationComplete={() => setToolbarAnimating(false)}
           >
-            <div
-              data-toolbar
-              className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-200/80 dark:border-slate-800/80 mb-1"
-            >
+            <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-200/80 dark:border-slate-800/80 mb-1">
               {toolbarPrefix}
               <FeedFilterPanel counts={categoryCounts} regionCounts={regionCounts} filterHook={feedFilter} />
               <SortOrderDropdown value={sortMode} onChange={setSortMode} />
