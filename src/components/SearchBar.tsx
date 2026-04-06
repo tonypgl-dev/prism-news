@@ -21,9 +21,11 @@ interface SearchBarProps {
   onRequestClose?: () => void;
   /** Focus input when panel opens (ex. căutare mobilă). */
   autoFocus?: boolean;
+  /** Bara din header: input tip pill, fără bordură dublă. */
+  embedded?: boolean;
 }
 
-export function SearchBar({ className = "", onRequestClose, autoFocus }: SearchBarProps) {
+export function SearchBar({ className = "", onRequestClose, autoFocus, embedded }: SearchBarProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [extended, setExtended] = useState(false);
@@ -118,14 +120,18 @@ export function SearchBar({ className = "", onRequestClose, autoFocus }: SearchB
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") {
+      if (e.key !== "Escape") return;
+      if (open && query.trim().length >= 2) {
         setOpen(false);
-        inputRef.current?.blur();
+        return;
       }
+      setOpen(false);
+      inputRef.current?.blur();
+      onRequestClose?.();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [open, query, onRequestClose]);
 
   const weekAgoTs = Date.now() - WEEK_MS;
   const hasOlderThanWeek =
@@ -163,10 +169,17 @@ export function SearchBar({ className = "", onRequestClose, autoFocus }: SearchB
         aria-label="Caută știri"
         autoComplete="off"
         spellCheck={false}
-        className="w-full rounded-sm border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm
-          placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-400
-          dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500
-          dark:focus:border-zinc-500 dark:focus:ring-zinc-600"
+        className={
+          embedded
+            ? `w-full rounded-full border-0 bg-transparent px-2 py-2 text-sm text-zinc-900 shadow-none appearance-none
+               placeholder:text-zinc-400 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0
+               sm:px-3
+               dark:text-zinc-100 dark:placeholder:text-zinc-500`
+            : `w-full rounded-sm border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm
+               placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-400
+               dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500
+               dark:focus:border-zinc-500 dark:focus:ring-zinc-600`
+        }
         placeholder="Caută în știri…"
       />
 
@@ -177,7 +190,9 @@ export function SearchBar({ className = "", onRequestClose, autoFocus }: SearchB
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ type: "spring", stiffness: 420, damping: 34 }}
-            className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[min(70vh,28rem)] overflow-hidden rounded-sm border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+            className={`absolute left-0 right-0 top-full z-50 mt-1.5 max-h-[min(70vh,28rem)] overflow-hidden border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900 ${
+              embedded ? "rounded-xl" : "rounded-sm"
+            }`}
           >
             {loading && (
               <div className="space-y-2 p-3" aria-busy="true" aria-label="Se încarcă">

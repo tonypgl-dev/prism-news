@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSettings } from "@/hooks/useSettings";
 import { SlidersHorizontal, Mail, X, Send, Search } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
@@ -167,6 +168,22 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
   const [contactOpen, setContactOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { settings } = useSettings();
+  const searchShellRef = useRef<HTMLDivElement>(null);
+  const searchToggleRef = useRef<HTMLButtonElement>(null);
+
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    function handlePointerDown(e: MouseEvent) {
+      const t = e.target as Node;
+      if (searchShellRef.current?.contains(t)) return;
+      if (searchToggleRef.current?.contains(t)) return;
+      setSearchOpen(false);
+    }
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [searchOpen]);
 
   const [logoLightPhase, setLogoLightPhase] = useState<LogoLightPhase>("plain");
   const [beamAnimKey, setBeamAnimKey] = useState(0);
@@ -364,18 +381,55 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
 
           {/* Dreapta: acțiuni sus, dată jos în același colț */}
           <div className="ml-auto flex min-w-0 flex-col items-end justify-between gap-2 shrink-0 py-0.5 md:py-3 self-stretch">
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="relative flex items-center gap-1.5 sm:gap-2 shrink-0 justify-end">
+              <AnimatePresence mode="sync">
+                {searchOpen && (
+                  <motion.div
+                    key="header-search-shell"
+                    ref={searchShellRef}
+                    id="header-search-panel"
+                    role="search"
+                    initial={{ scaleX: 0.08, opacity: 0, y: "-50%" }}
+                    animate={{ scaleX: 1, opacity: 1, y: "-50%" }}
+                    exit={{ scaleX: 0.08, opacity: 0, y: "-50%" }}
+                    transition={{ type: "spring", stiffness: 420, damping: 32, mass: 0.85 }}
+                    style={{
+                      transformOrigin: "right center",
+                      top: "50%",
+                      right: "100%",
+                      marginRight: "0.375rem",
+                      position: "absolute",
+                    }}
+                    className="z-[60] flex min-w-0 justify-end will-change-transform pointer-events-auto w-[min(9rem,calc(50vw-2.25rem))] sm:w-[min(18rem,calc(100vw-4.5rem))]"
+                  >
+                    <div
+                      className="w-full min-w-0 rounded-full border border-zinc-300/55 bg-white/88 px-1.5 py-0.5 backdrop-blur-md
+                        shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_1px_1px_rgba(15,23,42,0.05),0_3px_10px_rgba(15,23,42,0.08)]
+                        dark:border-zinc-600/50 dark:bg-zinc-900/88
+                        dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_1px_2px_rgba(0,0,0,0.45),0_4px_14px_rgba(0,0,0,0.35)]"
+                    >
+                      <SearchBar
+                        autoFocus
+                        embedded
+                        onRequestClose={closeSearch}
+                        className="w-full"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <button
+                ref={searchToggleRef}
                 type="button"
                 id="header-search-toggle"
                 aria-expanded={searchOpen}
                 aria-controls="header-search-panel"
                 onClick={() => setSearchOpen((v) => !v)}
-                className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+                className="shrink-0 p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors rounded-sm hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
                 title={searchOpen ? "Închide căutarea" : "Caută"}
                 aria-label={searchOpen ? "Închide căutarea" : "Deschide căutarea"}
               >
-                <Search size={18} />
+                {searchOpen ? <X size={18} strokeWidth={2.25} /> : <Search size={18} />}
               </button>
               <ThemeToggle />
 
@@ -417,20 +471,6 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
             />
           )}
         </div>
-
-        {searchOpen ? (
-          <div
-            id="header-search-panel"
-            className="w-full max-w-2xl mx-auto border-t border-gray-200 dark:border-gray-800 pt-2 pb-1 mt-1 px-0 sm:px-2"
-            role="search"
-          >
-            <SearchBar
-              autoFocus
-              onRequestClose={() => setSearchOpen(false)}
-              className="w-full"
-            />
-          </div>
-        ) : null}
         </div>
         </div>
       </header>
