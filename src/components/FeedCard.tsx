@@ -363,6 +363,10 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
                 {/* Strat 2 — The Context (ai_summary) */}
                 {activeArticle.ai_summary && (
                   <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-widest bg-slate-900 text-white dark:bg-white dark:text-slate-900 mr-1.5 align-middle translate-y-[-1px]">
+                      <Zap size={8} className="fill-white dark:fill-slate-900" />
+                      Rezumat AI
+                    </span>
                     {activeArticle.ai_summary}
                   </p>
                 )}
