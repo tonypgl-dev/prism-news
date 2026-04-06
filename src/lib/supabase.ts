@@ -204,19 +204,37 @@ export async function fetchArticlesByClusterId(clusterId: string): Promise<Artic
 }
 
 // ----------------------------------------------------------------
-// Căutare titlu + summary (ilike OR)
+// Căutare cu unaccent (diacritice opționale)
+// Folosește RPC-uri Postgres care aplică unaccent() pe ambele părți.
+// SQL necesar în Supabase (o singură dată):
+//
+//   CREATE OR REPLACE FUNCTION search_article_ids(
+//     p_query text, p_limit int DEFAULT 20, p_from_date text DEFAULT NULL
+//   ) RETURNS TABLE(id uuid, published_at timestamptz) LANGUAGE sql STABLE AS $$
+//     SELECT id, published_at FROM articles
+//     WHERE (
+//       unaccent(lower(title)) ILIKE unaccent(lower('%' || p_query || '%'))
+//       OR unaccent(lower(COALESCE(summary, ''))) ILIKE unaccent(lower('%' || p_query || '%'))
+//     )
+//     AND (p_from_date IS NULL OR published_at >= p_from_date::timestamptz)
+//     ORDER BY published_at DESC LIMIT p_limit;
+//   $$;
+//
+//   CREATE OR REPLACE FUNCTION count_search_articles(
+//     p_query text, p_from_date text DEFAULT NULL
+//   ) RETURNS bigint LANGUAGE sql STABLE AS $$
+//     SELECT COUNT(*) FROM articles
+//     WHERE (
+//       unaccent(lower(title)) ILIKE unaccent(lower('%' || p_query || '%'))
+//       OR unaccent(lower(COALESCE(summary, ''))) ILIKE unaccent(lower('%' || p_query || '%'))
+//     )
+//     AND (p_from_date IS NULL OR published_at >= p_from_date::timestamptz);
+//   $$;
 // ----------------------------------------------------------------
 
-function escapeIlikePattern(raw: string): string {
-  return raw
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/%/g, "\\%")
-    .replace(/_/g, "\\_");
-}
-
 /**
- * Caută în `title` și `summary` (ilike, OR). Max 20 rezultate, published_at desc.
+ * Caută în `title` și `summary` cu suport diacritice opționale (unaccent).
+ * "cumpara" găsește "cumpără", "stire" găsește "știre" etc.
  * @param from ISO minim published_at. Lipsește → ultimele 7 zile. `null` → fără filtru temporal.
  */
 export async function searchArticles(opts: {
@@ -227,34 +245,41 @@ export async function searchArticles(opts: {
   if (q.length < 2) return [];
 
   const supabase = createServerClient();
-  const pattern = `%${escapeIlikePattern(q)}%`;
-  const orClause = `title.ilike."${pattern}",summary.ilike."${pattern}"`;
-
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const fromBound = opts.from === undefined ? sevenDaysAgo : opts.from;
 
-  let queryBuilder = supabase
+  // Pas 1: obținem ID-urile articolelor (ordonate) via RPC cu unaccent
+  const { data: idRows, error: rpcError } = await supabase.rpc("search_article_ids", {
+    p_query: q,
+    p_limit: 20,
+    p_from_date: fromBound ?? null,
+  });
+
+  if (rpcError) {
+    console.error("[supabase] search_article_ids RPC:", rpcError.message);
+    return [];
+  }
+  if (!idRows?.length) return [];
+
+  const ids = (idRows as { id: string }[]).map((r) => r.id);
+
+  // Pas 2: fetch complet cu sources join (păstrăm ordinea din RPC)
+  const { data, error } = await supabase
     .from("articles")
     .select(ARTICLE_SELECT)
-    .or(orClause)
-    .order("published_at", { ascending: false })
-    .limit(20);
-
-  if (fromBound !== null) {
-    queryBuilder = queryBuilder.gte("published_at", fromBound);
-  }
-
-  const { data, error } = await queryBuilder;
+    .in("id", ids);
 
   if (error) {
-    console.error("[supabase] searchArticles:", error.message);
+    console.error("[supabase] searchArticles fetch:", error.message);
     return [];
   }
 
-  return (data as unknown as SupabaseArticle[]).map(mapRow);
+  const articles = (data as unknown as SupabaseArticle[]).map(mapRow);
+  // Re-ordonăm după ordinea din RPC (published_at desc)
+  return ids.map((id) => articles.find((a) => a.id === id)).filter(Boolean) as Article[];
 }
 
-/** Număr total de rânduri care se potrivesc (fără limit 20), pentru API search. */
+/** Număr total de rânduri care se potrivesc, cu unaccent. */
 export async function searchArticlesCount(opts: {
   query: string;
   from?: string | null;
@@ -263,27 +288,19 @@ export async function searchArticlesCount(opts: {
   if (q.length < 2) return 0;
 
   const supabase = createServerClient();
-  const pattern = `%${escapeIlikePattern(q)}%`;
-  const orClause = `title.ilike."${pattern}",summary.ilike."${pattern}"`;
-
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const fromBound = opts.from === undefined ? sevenDaysAgo : opts.from;
 
-  let queryBuilder = supabase
-    .from("articles")
-    .select("id", { count: "exact", head: true })
-    .or(orClause);
-
-  if (fromBound !== null) {
-    queryBuilder = queryBuilder.gte("published_at", fromBound);
-  }
-
-  const { count, error } = await queryBuilder;
+  const { data, error } = await supabase.rpc("count_search_articles", {
+    p_query: q,
+    p_from_date: fromBound ?? null,
+  });
 
   if (error) {
-    console.error("[supabase] searchArticlesCount:", error.message);
+    console.error("[supabase] count_search_articles RPC:", error.message);
     return 0;
   }
 
-  return count ?? 0;
+  return (data as number) ?? 0;
 }
+
