@@ -21,12 +21,12 @@ export function titleToFeaturedSlug(title: string, wordCount = 7): string {
 export function timeAgo(isoString: string): string {
   const diff = Date.now() - new Date(isoString).getTime();
   const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return "acum câteva secunde";
-  if (minutes < 60) return `acum ${minutes} min`;
+  if (minutes < 1) return "sub 1 min";
+  if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `acum ${hours} ${hours === 1 ? "oră" : "ore"}`;
+  if (hours < 24) return `${hours} ${hours === 1 ? "oră" : "ore"}`;
   const days = Math.floor(hours / 24);
-  return `acum ${days} ${days === 1 ? "zi" : "zile"}`;
+  return `${days} ${days === 1 ? "zi" : "zile"}`;
 }
 
 export const BIAS_LABELS: Record<Bias, string> = {

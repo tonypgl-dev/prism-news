@@ -7,20 +7,14 @@ import type { Article, ClusterRow, Bias } from "@/types";
 import { timeAgo, BIAS_COLORS, titleToFeaturedSlug } from "@/lib/utils";
 import { useSettings } from "@/hooks/useSettings";
 import { useFreemium } from "@/hooks/useFreemium";
-import { SourcePopover } from "./SourcePopover";
 import { ExpandedClusterRow } from "./ExpandedClusterRow";
+import { ArticleSharePopover } from "./ArticleSharePopover";
 
 const BIAS_ORDER: Bias[] = ["left", "center", "right"];
 
 function siblingCount(row: ClusterRow, mainBias: Bias): number {
   return BIAS_ORDER.filter((b) => b !== mainBias && row[b] !== null).length;
 }
-
-const DOT_COLORS: Record<Bias, string> = {
-  left:   "bg-blue-500",
-  center: "bg-slate-400",
-  right:  "bg-red-500",
-};
 
 function buildHaloGradient(row: ClusterRow): string {
   const colors: Record<Bias, string> = {
@@ -117,6 +111,13 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
   const hasAiContent = hasAiSummary || Boolean(activeArticle.original_snippet);
   const isCardExpandable = hasAiContent;
 
+  const thumbSourceBadgeBase = `
+    absolute z-[5] left-1 flex max-w-[min(calc(100%-0.5rem),9rem)] items-center rounded-t-sm rounded-br-sm
+    bg-black/55 px-1 py-px text-[8px] font-medium leading-none text-white backdrop-blur-[2px]
+    dark:bg-black/50
+    ${showBiasLabels ? "bottom-1" : "bottom-0"}
+  `;
+
   return (
     <div>
       {/* ── Card principal ──────────────────────────────────────────── */}
@@ -173,24 +174,29 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
               </motion.div>
             </AnimatePresence>
 
-            {/* Sursă + link extern — doar card deschis */}
-            {isExpanded && (
+            {/* Nume sursă pe thumbnail — mereu; link + icon extern doar când cardul e deschis */}
+            {isExpanded ? (
               <a
                 href={activeArticle.link}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 className={`
-                  absolute z-[5] left-1 flex max-w-[min(calc(100%-0.5rem),9rem)] items-center gap-0.5 rounded-t-sm rounded-br-sm
-                  bg-black/55 px-1 py-px text-[8px] font-medium leading-none text-white backdrop-blur-[2px]
-                  transition-colors hover:bg-black/70 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70
-                  dark:bg-black/50 dark:hover:bg-black/65
-                  ${showBiasLabels ? "bottom-1" : "bottom-0"}
+                  ${thumbSourceBadgeBase}
+                  gap-0.5 transition-colors hover:bg-black/70 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/70
+                  dark:hover:bg-black/65
                 `}
               >
                 <span className="min-w-0 truncate">{activeArticle.source?.name ?? "Sursă"}</span>
                 <ExternalLink size={9} strokeWidth={2.25} className="shrink-0 opacity-85" aria-hidden />
               </a>
+            ) : (
+              <span
+                className={`${thumbSourceBadgeBase} pointer-events-none`}
+                aria-hidden
+              >
+                <span className="min-w-0 truncate">{activeArticle.source?.name ?? "Sursă"}</span>
+              </span>
             )}
 
             {/* Bias Indicator Strip */}
@@ -205,52 +211,41 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
 
           {/* Body */}
           <div className="flex flex-col flex-1 py-3 pr-3 gap-2 min-w-0">
-            {/* Source + Dot Trio */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0" onClick={(e) => e.stopPropagation()}>
-                {activeArticle.source ? (
-                  <SourcePopover source={activeArticle.source} />
-                ) : (
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Unknown</span>
-                )}
-              </div>
-
-              {/* Bias Indicator — Clickable dots to switch perspective */}
+            {/* Page dots — swipe / tap to switch perspective */}
+            {hasCluster && (
               <div
-                className="flex items-center gap-1.5 shrink-0"
+                className="flex items-center justify-end gap-2 shrink-0 py-0.5"
                 onClick={(e) => e.stopPropagation()}
+                role="tablist"
+                aria-label="Perspectivă articol"
               >
-                {hasCluster ? (
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex gap-1">
-                      {BIAS_ORDER.map((b) => {
-                        const isPresent = row[b] !== null;
-                        const isActive = b === activeBias;
-                        const bColors = BIAS_COLORS[b];
-                        return (
-                          <button
-                            key={b}
-                            onClick={() => isPresent && switchTo(b)}
-                            disabled={!isPresent}
-                            className={`
-                              w-1.5 h-3 transition-all duration-200
-                              ${isPresent 
-                                ? isActive ? "opacity-100 scale-y-125" : "opacity-30 hover:opacity-60" 
-                                : "opacity-5 bg-slate-300 dark:bg-slate-700"
-                              }
-                            `}
-                            style={isPresent ? { backgroundColor: bColors.hex } : {}}
-                            title={isPresent ? `Citește din perspectiva de ${biasLabels[b]}` : `Nicio acoperire de ${biasLabels[b]}`}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="w-1.5 h-3" style={{ backgroundColor: colors.hex }} />
-                )}
+                {BIAS_ORDER.map((b) => {
+                  const isPresent = row[b] !== null;
+                  const isActive = b === activeBias;
+                  return (
+                    <button
+                      key={b}
+                      type="button"
+                      onClick={() => isPresent && switchTo(b)}
+                      disabled={!isPresent}
+                      role="tab"
+                      aria-selected={isActive}
+                      className={`
+                        rounded-full transition-all duration-200
+                        w-1.5 h-1.5
+                        ${!isPresent
+                          ? "bg-slate-200/35 dark:bg-slate-600/35 cursor-default"
+                          : isActive
+                            ? "bg-slate-500 dark:bg-slate-400 scale-125"
+                            : "bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500"
+                        }
+                      `}
+                      title={isPresent ? `Citește din perspectiva de ${biasLabels[b]}` : `Nicio acoperire de ${biasLabels[b]}`}
+                    />
+                  );
+                })}
               </div>
-            </div>
+            )}
 
             {/* Title — animat la switch perspectivă */}
             <AnimatePresence mode="wait" initial={false}>
@@ -279,11 +274,12 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
                 </div>
                 {hasAiSummary && !isExpanded && (
                   <span
-                    className="inline-flex items-center justify-center shrink-0 text-[var(--accent)]"
+                    className="inline-flex items-center gap-0 shrink-0 text-[var(--accent)]"
                     title="Include sinteză AI — deschide pentru detalii"
                     aria-label="Sinteză AI disponibilă"
                   >
-                    <Zap size={14} strokeWidth={2.25} className="fill-[var(--accent)]/25" aria-hidden />
+                    <Zap size={14} strokeWidth={2.25} className="fill-[var(--accent)]/25 shrink-0" aria-hidden />
+                    <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest">Sinteză</span>
                   </span>
                 )}
               </div>
@@ -299,6 +295,14 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
                     : <Link2 size={13} strokeWidth={2.25} />
                   }
                 </button>
+                <ArticleSharePopover
+                  slug={titleToFeaturedSlug(activeArticle.title)}
+                  articleTitle={activeArticle.title}
+                  onCopied={() => {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                />
 
                 {isCardExpandable && (
                   <button
