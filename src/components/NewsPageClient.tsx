@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, List, Rows3, Lock, X, Sparkles, Loader2, ChevronsUp } from "lucide-react";
 import { useFreemium } from "@/hooks/useFreemium";
@@ -34,8 +33,7 @@ interface Props {
 }
 
 export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, biasFilter = "all", toolbarPrefix, featuredClusterId }: Props) {
-  const router = useRouter();
-  // Latch: reținem featuredClusterId de la primul render (supraviețuiește router.replace)
+  // Latch: reținem featuredClusterId de la primul render (supraviețuiește URL cleanup)
   const [pinnedClusterId] = useState<string | undefined>(featuredClusterId);
   const [mode, setMode] = useState<ViewMode>("discovery");
   const [sortMode, setSortMode] = useState<SortOrder>("recent");
@@ -45,11 +43,12 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
   const { isPremium, daysUsed, isLoaded } = useFreemium();
   const { settings } = useSettings();
 
-  // ── Featured cluster (din link Facebook) ─────────────────────────────
+  // ── Featured cluster (din link Facebook / search) ────────────────────
   useEffect(() => {
     if (!featuredClusterId) return;
     setSortMode("recommended");
-    router.replace("/");
+    // history.replaceState curăță URL-ul fără să retriggereze server render
+    window.history.replaceState(null, "", "/");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [featuredClusterId]);
 
