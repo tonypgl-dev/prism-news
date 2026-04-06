@@ -369,14 +369,14 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
 
                 {/* Strat 3 — The Source Proof (original_snippet) */}
                 {activeArticle.original_snippet && (
-                  <div className="relative rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 px-3 py-2.5 shadow-inner">
-                    <span className="absolute -top-2 left-3 inline-flex items-center gap-1 bg-white dark:bg-gray-900 px-1.5 text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                  <div className="relative rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 px-3 pt-2.5 pb-5 shadow-inner">
+                    <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 leading-relaxed italic">
+                      &ldquo;{activeArticle.original_snippet}&rdquo;
+                    </p>
+                    <span className="absolute -bottom-2 right-3 inline-flex items-center gap-1 bg-white dark:bg-gray-900 px-1.5 text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                       <Newspaper size={8} />
                       Fragment original · {activeArticle.source?.name ?? "Sursă"}
                     </span>
-                    <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 leading-relaxed italic mt-1">
-                      &ldquo;{activeArticle.original_snippet}&rdquo;
-                    </p>
                   </div>
                 )}
 
