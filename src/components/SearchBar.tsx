@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Article } from "@/types";
-import { BIAS_COLORS, timeAgo } from "@/lib/utils";
+import { BIAS_COLORS, timeAgo, titleToFeaturedSlug } from "@/lib/utils";
 
 type SearchApiResponse = {
   results: Article[];
@@ -23,6 +24,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ className = "", onRequestClose, autoFocus }: SearchBarProps) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [extended, setExtended] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -134,10 +136,12 @@ export function SearchBar({ className = "", onRequestClose, autoFocus }: SearchB
     setOpen(true);
   }
 
-  function handleResultClick(link: string) {
-    window.open(link, "_blank", "noopener,noreferrer");
+  function handleResultClick(article: Article) {
+    const featured = article.cluster_id ?? titleToFeaturedSlug(article.title);
     setOpen(false);
+    setQuery("");
     onRequestClose?.();
+    router.push(`/?featured=${featured}`);
   }
 
   const showEmptyRecent = !loading && !extended && query.trim().length >= 2 && results.length === 0;
@@ -227,7 +231,7 @@ export function SearchBar({ className = "", onRequestClose, autoFocus }: SearchB
                           <button
                             type="button"
                             role="option"
-                            onClick={() => handleResultClick(article.link)}
+                            onClick={() => handleResultClick(article)}
                             className="flex w-full gap-2 px-3 py-2.5 text-left transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/80"
                           >
                             <span
