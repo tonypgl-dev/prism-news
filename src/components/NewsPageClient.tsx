@@ -280,87 +280,94 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
             exit={{ opacity: 0, height: 0 }}
             transition={{ type: "spring", stiffness: 380, damping: 34 }}
             className="overflow-hidden"
+            style={{ position: "relative", zIndex: 20 }}
+            onAnimationComplete={(def) => {
+              if (def === "animate") {
+                // Permite dropdown-urilor să iasă în afara toolbar-ului
+                const el = document.querySelector("[data-toolbar]") as HTMLElement | null;
+                if (el) el.style.overflow = "visible";
+              }
+            }}
+            onAnimationStart={() => {
+              const el = document.querySelector("[data-toolbar]") as HTMLElement | null;
+              if (el) el.style.overflow = "hidden";
+            }}
           >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2 pb-2 border-b border-slate-200/80 dark:border-slate-800/80 mb-1">
-              {settings.showBlindspots && blindspotCount > 0 && (
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 shrink-0 max-sm:order-first">
+            <div
+              data-toolbar
+              className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-200/80 dark:border-slate-800/80 mb-1"
+            >
+              {toolbarPrefix}
+              <FeedFilterPanel counts={categoryCounts} regionCounts={regionCounts} filterHook={feedFilter} />
+              <SortOrderDropdown value={sortMode} onChange={setSortMode} />
+              <div
+                className="flex items-center bg-slate-100 dark:bg-gray-800 rounded-sm p-1 gap-1 shrink-0"
+                role="group"
+                aria-label="Mod de afișare"
+              >
+                <button
+                  onClick={() => setMode("discovery")}
+                  aria-pressed={mode === "discovery"}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-semibold transition-all duration-200 ${
+                    mode === "discovery"
+                      ? "bg-[var(--card)] dark:bg-gray-900 text-slate-900 dark:text-slate-100 shadow-sm"
+                      : "text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200"
+                  }`}
+                >
+                  <List size={13} />
+                  Discovery
+                </button>
+                <button
+                  onClick={() => isPremium ? setMode("aligned") : setUpsellOpen(true)}
+                  aria-pressed={mode === "aligned"}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-semibold transition-all duration-200 ${
+                    mode === "aligned"
+                      ? "bg-[var(--card)] dark:bg-gray-900 text-slate-900 dark:text-slate-100 shadow-sm"
+                      : !isPremium && isLoaded
+                      ? "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                      : "text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200"
+                  }`}
+                >
+                  <Rows3 size={13} />
+                  Aliniat
+                  {!isPremium && isLoaded && <Lock size={10} className="ml-0.5" />}
+                </button>
+              </div>
+              {isPremium && settings.showBlindspots && (
+                <button
+                  onClick={() => setBlindspotOnly((v) => !v)}
+                  aria-pressed={blindspotOnly}
+                  className={`
+                    inline-flex items-center gap-2 px-4 py-2 rounded-sm
+                    text-xs font-bold border transition-all duration-200 shrink-0
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500
+                    ${
+                      blindspotOnly
+                        ? "bg-amber-500 border-amber-500 text-white shadow-md shadow-amber-200 dark:shadow-amber-900/40"
+                        : "bg-[var(--card)] dark:bg-gray-900 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                    }
+                  `}
+                >
+                  <AlertTriangle size={13} />
+                  {blindspotOnly ? (
+                    <span>Blindspot-uri active — click pentru toate</span>
+                  ) : (
+                    <>
+                      <span>Blindspot-uri</span>
+                      {blindspotCount > 0 && (
+                        <span className="bg-amber-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
+                          {blindspotCount}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </button>
+              )}
+              {settings.showBlindspots && blindspotCount > 0 && !isPremium && (
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 shrink-0">
                   {blindspotCount} Blindspots detected
                 </span>
               )}
-
-              <div className="flex flex-col gap-2 w-full sm:ml-auto sm:w-auto sm:items-end">
-                <div className="flex flex-wrap items-center gap-2 w-full justify-start sm:justify-end">
-                  {toolbarPrefix}
-                  <FeedFilterPanel counts={categoryCounts} regionCounts={regionCounts} filterHook={feedFilter} />
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 w-full justify-start sm:justify-end">
-                  <SortOrderDropdown value={sortMode} onChange={setSortMode} />
-                  <div
-                    className="flex items-center bg-slate-100 dark:bg-gray-800 rounded-sm p-1 gap-1 shrink-0"
-                    role="group"
-                    aria-label="Mod de afișare"
-                  >
-                    <button
-                      onClick={() => setMode("discovery")}
-                      aria-pressed={mode === "discovery"}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-semibold transition-all duration-200 ${
-                        mode === "discovery"
-                          ? "bg-[var(--card)] dark:bg-gray-900 text-slate-900 dark:text-slate-100 shadow-sm"
-                          : "text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200"
-                      }`}
-                    >
-                      <List size={13} />
-                      Discovery
-                    </button>
-                    <button
-                      onClick={() => isPremium ? setMode("aligned") : setUpsellOpen(true)}
-                      aria-pressed={mode === "aligned"}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-semibold transition-all duration-200 ${
-                        mode === "aligned"
-                          ? "bg-[var(--card)] dark:bg-gray-900 text-slate-900 dark:text-slate-100 shadow-sm"
-                          : !isPremium && isLoaded
-                          ? "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                          : "text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-200"
-                      }`}
-                    >
-                      <Rows3 size={13} />
-                      Aliniat
-                      {!isPremium && isLoaded && <Lock size={10} className="ml-0.5" />}
-                    </button>
-                  </div>
-                  {isPremium && settings.showBlindspots && (
-                    <button
-                      onClick={() => setBlindspotOnly((v) => !v)}
-                      aria-pressed={blindspotOnly}
-                      className={`
-                        inline-flex items-center gap-2 px-4 py-2 rounded-sm
-                        text-xs font-bold border transition-all duration-200 shrink-0
-                        focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500
-                        ${
-                          blindspotOnly
-                            ? "bg-amber-500 border-amber-500 text-white shadow-md shadow-amber-200 dark:shadow-amber-900/40"
-                            : "bg-[var(--card)] dark:bg-gray-900 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
-                        }
-                      `}
-                    >
-                      <AlertTriangle size={13} />
-                      {blindspotOnly ? (
-                        <span>Blindspot-uri active — click pentru toate</span>
-                      ) : (
-                        <>
-                          <span>Blindspot-uri</span>
-                          {blindspotCount > 0 && (
-                            <span className="bg-amber-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
-                              {blindspotCount}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
             </div>
           </motion.div>
         )}
