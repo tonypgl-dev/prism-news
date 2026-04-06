@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/Header";
+import { HomeTagline } from "@/components/HomeTagline";
 import { SpectrumSection } from "@/components/SpectrumSection";
 import { buildClusterRows } from "@/lib/cluster";
 import { fetchLatestArticles, fetchArticlesByClusterId, fetchClusterIdBySlug } from "@/lib/supabase";
@@ -149,7 +150,8 @@ export default async function HomePage({ searchParams }: PageProps) {
     <>
       <Header tickerItems={tickerItems} dateLabel={today} />
 
-      <main className="flex-1 max-w-screen-xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
+      <main className="flex-1 max-w-screen-xl mx-auto w-full px-4 sm:px-6 pt-8 pb-6 sm:pt-12 space-y-6">
+        <HomeTagline />
         {/* Spectru + feed filtrat */}
         {articles.length === 0 ? (
           <EmptyState />

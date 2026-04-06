@@ -186,12 +186,15 @@ export function SearchBar({ className = "", onRequestClose, autoFocus, embedded 
       <AnimatePresence>
         {open && query.trim().length >= 2 && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
+            key="search-results-panel"
+            initial={{ opacity: 0, y: -10, ...(embedded ? { x: "-50%" } : {}) }}
+            animate={{ opacity: 1, y: 0, ...(embedded ? { x: "-50%" } : {}) }}
+            exit={{ opacity: 0, y: -8, ...(embedded ? { x: "-50%" } : {}) }}
             transition={{ type: "spring", stiffness: 420, damping: 34 }}
-            className={`absolute left-0 right-0 top-full z-50 mt-1.5 max-h-[min(70vh,28rem)] overflow-hidden border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900 ${
-              embedded ? "rounded-xl" : "rounded-sm"
+            className={`absolute top-full z-[60] mt-1.5 max-h-[min(70vh,28rem)] overflow-hidden border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-900 ${
+              embedded
+                ? "left-1/2 w-[min(200%,calc(100vw-0.75rem))] rounded-xl"
+                : "left-0 right-0 rounded-sm"
             }`}
           >
             {loading && (
