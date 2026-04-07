@@ -351,7 +351,7 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
           >
               <div className="px-4 pb-4 pt-1 flex flex-col gap-3 border-t border-gray-100 dark:border-gray-800">
 
-                {/* Strat 1 — The Hook (ai_pre_summary) */}
+                {/* Un singur badge „Rezumat AI”: lângă primul strat vizibil (hook sau doar context) */}
                 {showAiPreSummary && activeArticle.ai_pre_summary && (
                   <div className="flex items-start gap-2">
                     <span className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-widest bg-slate-900 text-white dark:bg-white dark:text-slate-900 mt-0.5">
@@ -364,13 +364,14 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
                   </div>
                 )}
 
-                {/* Strat 2 — The Context (ai_summary) */}
                 {activeArticle.ai_summary && (
                   <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-widest bg-slate-900 text-white dark:bg-white dark:text-slate-900 mr-1.5 align-middle translate-y-[-1px]">
-                      <Zap size={8} className="fill-white dark:fill-slate-900" />
-                      Rezumat AI
-                    </span>
+                    {!(showAiPreSummary && activeArticle.ai_pre_summary) && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-widest bg-slate-900 text-white dark:bg-white dark:text-slate-900 mr-1.5 align-middle translate-y-[-1px]">
+                        <Zap size={8} className="fill-white dark:fill-slate-900" />
+                        Rezumat AI
+                      </span>
+                    )}
                     {activeArticle.ai_summary}
                   </p>
                 )}
