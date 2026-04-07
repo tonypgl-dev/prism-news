@@ -51,7 +51,6 @@ async function main() {
 
   if (article.ai_summary) {
     console.log(`ℹ️   Articolul are deja rezumat AI:`);
-    console.log(`    Hook: ${article.ai_pre_summary}`);
     console.log(`    Sinteză: ${article.ai_summary}`);
     console.log("");
     process.stdout.write("Vrei să suprascrieți? (y/N): ");
@@ -74,15 +73,14 @@ async function main() {
     messages: [{
       role: "user",
       content: `Ești un editor de știri român. Pe baza titlului și fragmentului de mai jos, generează în română:
-1. O propoziție de impact scurtă (hook) care captează esența știrii.
-2. O sinteză neutră care explică clar CE s-a întâmplat, contextul relevant și de ce contează, fără a copia formulări din sursă.
-3. UN SINGUR subiect de abonare: (a) persoană publică → numele complet; (b) țară/org/instituție → entitatea; (c) altfel → topic 1–3 cuvinte.
+1. O singură sinteză neutră care explică clar CE s-a întâmplat, contextul relevant și de ce contează, fără a copia formulări din sursă. Nu repeta sau reformula titlul ca propoziție separată de tip „lead”.
+2. UN SINGUR subiect de abonare: (a) persoană publică → numele complet; (b) țară/org/instituție → entitatea; (c) altfel → topic 1–3 cuvinte.
 
 Titlu: ${article.title}
 Fragment: ${article.original_snippet}
 
 Răspunde EXCLUSIV în formatul JSON:
-{"pre": "propoziția scurtă", "summary": "sinteza neutră", "topic": "subiect abonare"}`,
+{"summary": "sinteza neutră", "topic": "subiect abonare"}`,
     }],
   });
 
@@ -91,15 +89,18 @@ Răspunde EXCLUSIV în formatul JSON:
   if (!match) { console.error("❌  AI nu a returnat JSON valid:\n", raw); process.exit(1); }
 
   const parsed = JSON.parse(match[0]);
+  if (!parsed.summary || !String(parsed.summary).trim()) {
+    console.error("❌  AI nu a returnat câmpul summary în JSON.");
+    process.exit(1);
+  }
   console.log(`\n✅  Rezultat:`);
-  console.log(`   Hook:    ${parsed.pre}`);
   console.log(`   Sinteză: ${parsed.summary}`);
   console.log(`   Topic:   ${parsed.topic}`);
 
   const { error: updateErr } = await supabase
     .from("articles")
     .update({
-      ai_pre_summary: parsed.pre ?? null,
+      ai_pre_summary: null,
       ai_summary: parsed.summary ?? null,
       subscription_topic: parsed.topic ?? null,
     })

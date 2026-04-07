@@ -1,7 +1,7 @@
 /**
  * scripts/backfill-ai-summaries.js
  *
- * Generează ai_pre_summary + ai_summary + subscription_topic pentru articolele
+ * Generează ai_summary + subscription_topic pentru articolele
  * recente care le au NULL (ex: perioadă când ANTHROPIC_API_KEY era dezactivat).
  *
  * Utilizare:
@@ -50,15 +50,14 @@ async function generateSummaries(title, snippet) {
         {
           role: "user",
           content: `Ești un editor de știri român. Pe baza titlului și fragmentului de mai jos, generează în română:
-1. O propoziție de impact scurtă (hook) care captează esența știrii.
-2. O sinteză neutră care explică clar CE s-a întâmplat, contextul relevant și de ce contează, fără a copia formulări din sursă.
-3. UN SINGUR subiect de abonare: (a) persoană publică → numele complet; (b) țară/org/instituție → entitatea; (c) altfel → topic 1–3 cuvinte.
+1. O singură sinteză neutră care explică clar CE s-a întâmplat, contextul relevant și de ce contează, fără a copia formulări din sursă. Nu repeta sau reformula titlul ca propoziție separată de tip „lead”.
+2. UN SINGUR subiect de abonare: (a) persoană publică → numele complet; (b) țară/org/instituție → entitatea; (c) altfel → topic 1–3 cuvinte.
 
 Titlu: ${title}
 Fragment: ${snippet}
 
 Răspunde EXCLUSIV în formatul JSON:
-{"pre": "propoziția scurtă", "summary": "sinteza neutră", "topic": "subiect abonare"}`,
+{"summary": "sinteza neutră", "topic": "subiect abonare"}`,
         },
       ],
     });
@@ -68,11 +67,12 @@ Răspunde EXCLUSIV în formatul JSON:
     if (!match) return null;
 
     const parsed = JSON.parse(match[0]);
-    if (!parsed.pre || !parsed.summary) return null;
+    const summary = (parsed.summary ?? "").trim();
+    if (!summary) return null;
 
     return {
-      ai_pre_summary: parsed.pre.trim() || null,
-      ai_summary: parsed.summary.trim() || null,
+      ai_pre_summary: null,
+      ai_summary: summary,
       subscription_topic: (parsed.topic ?? "").trim() || null,
     };
   } catch (err) {

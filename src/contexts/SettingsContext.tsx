@@ -12,7 +12,6 @@ export interface SettingsState {
   showBiasLabels: boolean;
   prismMode: "default" | "compact";
   titleFont: "sans" | "serif";
-  showAiPreSummary: boolean;
   showBlindspots: boolean;
   showBreakingTicker: boolean;
 }
@@ -22,7 +21,6 @@ export const DEFAULT_SETTINGS: SettingsState = {
   showBiasLabels: true,
   prismMode: "default",
   titleFont: "sans",
-  showAiPreSummary: true,
   showBlindspots: false,
   showBreakingTicker: false,
 };
@@ -47,7 +45,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       const stored = localStorage.getItem("prism-settings");
       if (stored) {
-        setSettings((prev) => ({ ...prev, ...JSON.parse(stored) }));
+        const parsed = JSON.parse(stored) as Record<string, unknown>;
+        delete parsed.showAiPreSummary;
+        setSettings((prev) => ({ ...prev, ...parsed }));
       }
     } catch {
       // ignore

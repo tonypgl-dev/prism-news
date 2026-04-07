@@ -125,15 +125,14 @@ async function generateAiSummaries(
         {
           role: "user",
           content: `Ești un editor de știri român. Pe baza titlului și fragmentului de mai jos, generează în română:
-1. O propoziție de impact scurtă (hook) care captează esența știrii.
-2. O sinteză neutră care explică clar CE s-a întâmplat, contextul relevant și de ce contează, fără a copia formulări din sursă. Lungimea rezumatului trebuie să fie potrivită complexității subiectului (poate fi mai lung dacă e nevoie).
-3. UN SINGUR subiect de abonare, ales după prioritate: (a) dacă apare un nume de persoană publică → numele complet (ex: "Marcel Ciolacu"); (b) dacă apare o țară, organizație sau instituție → entitatea (ex: "SUA", "NATO", "BNR"); (c) altfel → topicul principal în 1–3 cuvinte (ex: "prețul benzinei"). Returnează doar string-ul, fără explicații.
+1. O singură sinteză neutră care explică clar CE s-a întâmplat, contextul relevant și de ce contează, fără a copia formulări din sursă. Nu repeta sau reformula titlul ca propoziție separată de tip „lead”; integrează informația în corpul sintezei dacă e necesar. Lungimea trebuie să fie potrivită complexității subiectului.
+2. UN SINGUR subiect de abonare, ales după prioritate: (a) dacă apare un nume de persoană publică → numele complet (ex: "Marcel Ciolacu"); (b) dacă apare o țară, organizație sau instituție → entitatea (ex: "SUA", "NATO", "BNR"); (c) altfel → topicul principal în 1–3 cuvinte (ex: "prețul benzinei"). Returnează doar string-ul, fără explicații.
 
 Titlu: ${title}
 Fragment: ${snippet}
 
 Răspunde EXCLUSIV în formatul JSON:
-{"pre": "propoziția scurtă", "summary": "sinteza neutră", "topic": "subiect abonare"}`,
+{"summary": "sinteza neutră", "topic": "subiect abonare"}`,
         },
       ],
     });
@@ -142,15 +141,14 @@ Răspunde EXCLUSIV în formatul JSON:
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return null;
 
-    const parsed = JSON.parse(jsonMatch[0]) as { pre?: string; summary?: string; topic?: string };
-    if (!parsed.pre || !parsed.summary) return null;
-
-    const pre = (parsed.pre ?? "").trim();
+    const parsed = JSON.parse(jsonMatch[0]) as { summary?: string; topic?: string };
     const summary = (parsed.summary ?? "").trim();
+    if (!summary) return null;
+
     const topic = (parsed.topic ?? "").trim();
     return {
-      ai_pre_summary: pre || null,
-      ai_summary: summary || null,
+      ai_pre_summary: null,
+      ai_summary: summary,
       subscription_topic: topic || null,
     };
   } catch {

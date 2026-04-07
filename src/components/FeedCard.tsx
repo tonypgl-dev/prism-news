@@ -44,7 +44,7 @@ interface Props {
 
 export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
   const { biasLabels, settings } = useSettings();
-  const { showBiasLabels, titleFont, showAiPreSummary } = settings;
+  const { showBiasLabels, titleFont } = settings;
   const { isPremium } = useFreemium();
 
   // ── Swipe-to-switch perspective ───────────────────────────────────
@@ -108,6 +108,10 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
   const haloGradient = buildHaloGradient(row);
 
   const hasAiSummary = Boolean(activeArticle.ai_pre_summary || activeArticle.ai_summary);
+  const aiDescriptionText =
+    activeArticle.ai_summary?.trim() ||
+    activeArticle.ai_pre_summary?.trim() ||
+    "";
   const hasAiContent = hasAiSummary || Boolean(activeArticle.original_snippet);
   const isCardExpandable = hasAiContent;
 
@@ -351,28 +355,14 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
           >
               <div className="px-4 pb-4 pt-1 flex flex-col gap-3 border-t border-gray-100 dark:border-gray-800">
 
-                {/* Un singur badge „Rezumat AI”: lângă primul strat vizibil (hook sau doar context) */}
-                {showAiPreSummary && activeArticle.ai_pre_summary && (
-                  <div className="flex items-start gap-2">
-                    <span className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-widest bg-slate-900 text-white dark:bg-white dark:text-slate-900 mt-0.5">
+                {/* Rezumat AI: badge la începutul descrierii (ai_summary; fallback ai_pre_summary pentru articole vechi) */}
+                {aiDescriptionText && (
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-widest bg-slate-900 text-white dark:bg-white dark:text-slate-900 mr-1.5 align-middle translate-y-[-1px]">
                       <Zap size={8} className="fill-white dark:fill-slate-900" />
                       Rezumat AI
                     </span>
-                    <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 leading-snug">
-                      {activeArticle.ai_pre_summary}
-                    </p>
-                  </div>
-                )}
-
-                {activeArticle.ai_summary && (
-                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {!(showAiPreSummary && activeArticle.ai_pre_summary) && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] font-black uppercase tracking-widest bg-slate-900 text-white dark:bg-white dark:text-slate-900 mr-1.5 align-middle translate-y-[-1px]">
-                        <Zap size={8} className="fill-white dark:fill-slate-900" />
-                        Rezumat AI
-                      </span>
-                    )}
-                    {activeArticle.ai_summary}
+                    {aiDescriptionText}
                   </p>
                 )}
 

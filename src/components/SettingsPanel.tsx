@@ -350,17 +350,6 @@ function SettingsPanelInner({ isOpen, onClose, settings, onSettingsChange }: Pro
                   />
                 </SettingRow>
                 <SettingRow
-                  icon={Zap}
-                  label="Sinteză rapidă AI"
-                  description="Afișează propoziția de impact generată de AI la expandarea cardului."
-                >
-                  <Toggle
-                    id="toggle-ai-pre-summary"
-                    checked={settings.showAiPreSummary}
-                    onChange={(v) => onSettingsChange({ showAiPreSummary: v })}
-                  />
-                </SettingRow>
-                <SettingRow
                   icon={AlertTriangle}
                   label="Alerte Blindspot"
                   description="Semnalizează subiectele cu acoperire unilaterală."
