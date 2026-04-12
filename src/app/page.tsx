@@ -10,6 +10,7 @@ import {
   fetchEditorialArticles,
 } from "@/lib/supabase";
 import { FEED_FROM_ALL } from "@/lib/feed-from";
+import { excludePrismaEditorialFromNewsArticles } from "@/lib/prisma-feed";
 import type { DateRange } from "@/hooks/useFeedFilter";
 import type { ClusterRow } from "@/types";
 import { AlertCircle } from "lucide-react";
@@ -133,19 +134,22 @@ export default async function HomePage({ searchParams }: PageProps) {
     fetchEditorialArticles({ limit: 5 }),
   ]);
 
-  let articles = articles24h;
+  // Fără articolele sursei Prisma din feed-ul de știri — apar deja ca rânduri editoriale dedicate.
+  let articles = excludePrismaEditorialFromNewsArticles(articles24h);
   let feedInitialFrom: string = from24h;
   let feedDefaultDateRange: DateRange | undefined;
 
   if (articles.length === 0) {
-    articles = await fetchLatestArticles({ limit: 30, offset: 0, from: from30d });
+    articles = excludePrismaEditorialFromNewsArticles(
+      await fetchLatestArticles({ limit: 30, offset: 0, from: from30d })
+    );
     if (articles.length > 0) {
       feedInitialFrom = from30d;
       feedDefaultDateRange = "30d";
     }
   }
   if (articles.length === 0) {
-    articles = await fetchLatestArticles({ limit: 30 });
+    articles = excludePrismaEditorialFromNewsArticles(await fetchLatestArticles({ limit: 30 }));
     if (articles.length > 0) {
       feedInitialFrom = FEED_FROM_ALL;
       feedDefaultDateRange = "30d";

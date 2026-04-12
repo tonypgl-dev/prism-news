@@ -19,6 +19,7 @@ import {
   type CategoryKey,
   type RegionKey,
 } from "@/lib/categories";
+import { isPrismaEditorialRow } from "@/lib/prisma-feed";
 import type { BiasFilter } from "./SpectrumSection";
 
 type ViewMode = "discovery" | "aligned";
@@ -210,8 +211,20 @@ export function NewsPageClient({
 
   const sortedRows = useMemo(() => {
     const base = blindspotOnly ? biasFilteredRows.filter(isBlindspot) : biasFilteredRows;
+
+    /** Rândurile editoriale Prisma rămân primele după filtre, indiferent de sortare. */
+    const sticky = (a: ClusterRow, b: ClusterRow): number | null => {
+      const ea = isPrismaEditorialRow(a);
+      const eb = isPrismaEditorialRow(b);
+      if (ea && !eb) return -1;
+      if (!ea && eb) return 1;
+      return null;
+    };
+
     if (sortMode === "popular") {
       return [...base].sort((a, b) => {
+        const s = sticky(a, b);
+        if (s !== null) return s;
         const scoreA = (a.left ? 1 : 0) + (a.center ? 1 : 0) + (a.right ? 1 : 0);
         const scoreB = (b.left ? 1 : 0) + (b.center ? 1 : 0) + (b.right ? 1 : 0);
         return scoreB - scoreA;
@@ -222,24 +235,30 @@ export function NewsPageClient({
         (r.left ? 1 : 0) + (r.center ? 1 : 0) + (r.right ? 1 : 0);
       const hasAi = (r: ClusterRow) =>
         [r.left, r.center, r.right].some(
-          (a) => a && (a.ai_pre_summary || a.ai_summary)
+          (art) => art && (art.ai_pre_summary || art.ai_summary)
         );
       const latestTs = (r: ClusterRow) =>
         Math.max(
           0,
           ...[r.left, r.center, r.right]
             .filter(Boolean)
-            .map((a) => new Date(a!.published_at).getTime())
+            .map((art) => new Date(art!.published_at).getTime())
         );
       return [...base].sort((a, b) => {
+        const st = sticky(a, b);
+        if (st !== null) return st;
         const sa = perspectives(a) * 1000 + (hasAi(a) ? 100 : 0);
         const sb = perspectives(b) * 1000 + (hasAi(b) ? 100 : 0);
         if (sb !== sa) return sb - sa;
         return latestTs(b) - latestTs(a);
       });
     }
-    // "recent" — ordinea default e deja DESC published_at din server
-    return base;
+    // "recent" — păstrăm ordinea din server, dar editorialele Prisma rămân primele
+    return [...base].sort((a, b) => {
+      const s = sticky(a, b);
+      if (s !== null) return s;
+      return 0;
+    });
   }, [biasFilteredRows, blindspotOnly, sortMode]);
 
   const visibleRows = sortedRows;

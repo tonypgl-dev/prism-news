@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Article } from "@/types";
 import { FEED_FROM_ALL } from "@/lib/feed-from";
+import { PRISMA_EDITORIAL_SOURCE_ID } from "@/lib/prisma-feed";
 
 // ----------------------------------------------------------------
 // Tipuri Supabase (reflectă schema.sql)
@@ -164,7 +165,10 @@ export async function fetchArticlesPaginated(opts: {
 
   const lower = opts.from && opts.from !== FEED_FROM_ALL ? opts.from : null;
 
-  let q = supabase.from("articles").select(ARTICLE_SELECT, { count: "exact" });
+  let q = supabase
+    .from("articles")
+    .select(ARTICLE_SELECT, { count: "exact" })
+    .neq("source_id", PRISMA_EDITORIAL_SOURCE_ID);
   if (lower) q = q.gte("published_at", lower);
   const { data, error, count } = await q
     .order("published_at", { ascending: false })
