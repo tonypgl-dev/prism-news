@@ -29,11 +29,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `https://prisma-news.ro/editorial/${id}`,
       siteName: "Prisma News",
       locale: "ro_RO",
+      images: article.image_url
+        ? [{ url: article.image_url, width: 1200, height: 630, alt: article.title }]
+        : [{ url: `https://prisma-news.ro/editorial/${id}/opengraph-image`, width: 1200, height: 630, alt: article.title }],
     },
     twitter: {
       card: "summary_large_image",
       title: article.title,
       description,
+      images: article.image_url
+        ? [article.image_url]
+        : [`https://prisma-news.ro/editorial/${id}/opengraph-image`],
     },
   };
 }
