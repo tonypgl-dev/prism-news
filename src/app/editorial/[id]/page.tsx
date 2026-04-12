@@ -17,15 +17,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await fetchEditorialArticleById(id);
   if (!article) return { title: "Articol editorial — Prisma News" };
 
+  const description = article.summary ?? undefined;
+
   return {
     title: `${article.title} — Prisma News`,
-    description: article.summary ?? undefined,
+    description,
     openGraph: {
       title: article.title,
-      description: article.summary ?? undefined,
+      description,
       type: "article",
+      url: `https://prisma-news.ro/editorial/${id}`,
       siteName: "Prisma News",
       locale: "ro_RO",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description,
     },
   };
 }
