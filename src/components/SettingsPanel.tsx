@@ -16,6 +16,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { DEFAULT_SETTINGS, type SettingsState } from "@/contexts/SettingsContext";
 import { useSettings } from "@/hooks/useSettings";
 
@@ -451,6 +452,40 @@ function SettingsPanelInner({ isOpen, onClose, settings, onSettingsChange }: Pro
                   Primește notificări când un subiect important lipsește dintr-o perspectivă.
                 </p>
               </Section>
+
+              <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
+                <nav className="flex flex-col gap-3" aria-label="Informații legale">
+                  <div className="flex flex-col gap-2">
+                    <Link
+                      href="/termeni"
+                      onClick={onClose}
+                      className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      Termeni și condiții
+                    </Link>
+                    <Link
+                      href="/confidentialitate"
+                      onClick={onClose}
+                      className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      Confidențialitate
+                    </Link>
+                    <Link
+                      href="/cookies"
+                      onClick={onClose}
+                      className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      Politica de cookies
+                    </Link>
+                  </div>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-snug">
+                    © 2026 Prisma News · Toate drepturile rezervate.
+                  </p>
+                  <p className="text-[9px] font-medium text-slate-400 dark:text-slate-600 tabular-nums">
+                    v1.1.0-beta
+                  </p>
+                </nav>
+              </div>
             </div>
 
             {/* ── Footer ────────────────────────────────────────── */}

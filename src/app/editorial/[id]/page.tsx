@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { fetchEditorialArticleById } from "@/lib/supabase";
 import { Header } from "@/components/Header";
+import { EditorialHero } from "@/components/EditorialHero";
+import { EditorialHtmlBody } from "@/components/EditorialHtmlBody";
 import { getCategoryLabel, CATEGORY_MAP } from "@/lib/editorial-categories";
 
 export const revalidate = 3600;
@@ -22,7 +23,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: article.title,
       description: article.summary ?? undefined,
-      images: article.image_url ? [{ url: article.image_url }] : undefined,
       type: "article",
       siteName: "Prisma News",
       locale: "ro_RO",
@@ -39,57 +39,57 @@ export default async function EditorialArticlePage({ params }: Props) {
   const cat = article.category ? CATEGORY_MAP[article.category] : null;
   const accentColor = cat?.accent ?? "#C8963E";
 
+  const cssVars = cat
+    ? ({
+        "--ed-accent": cat.accent,
+        "--ed-accent-dark": cat.accentDark,
+        "--ed-hero-from": cat.hero[0],
+        "--ed-hero-mid": cat.hero[1],
+        "--ed-hero-to": cat.hero[2],
+        "--ed-tips-bg": cat.tipsBg,
+        "--ed-tips-bg-dark": cat.tipsBgDark,
+        "--ed-tips-color": cat.tipsColor,
+        "--ed-tips-color-dark": cat.tipsColorDark,
+      } as React.CSSProperties)
+    : undefined;
+
   return (
     <>
       <Header sticky={false} />
 
-      {/* Category pill */}
-      {categoryLabel && (
-        <div className="max-w-[780px] mx-auto px-5 pt-5 pb-1">
-          <span
-            className="inline-block text-[10px] font-bold uppercase tracking-[3px] px-3 py-1 rounded-full border"
-            style={{
-              color: accentColor,
-              borderColor: `${accentColor}55`,
-            }}
-          >
-            ✦ Prism News · {categoryLabel}
-          </span>
-        </div>
-      )}
-
-      {article.image_url && (
-        <div className="max-w-[780px] mx-auto px-5 pt-2 pb-3">
-          <div className="relative w-full aspect-[16/9] max-h-[min(420px,50vh)] rounded-sm overflow-hidden border border-[var(--card-border)] bg-[var(--card)]">
-            <Image
-              src={article.image_url}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="(max-width: 780px) 100vw, 780px"
-              priority
-            />
+      <div className="overflow-x-hidden">
+        {!article.image_url && categoryLabel && (
+          <div className="max-w-[780px] mx-auto px-5 pt-5 pb-1">
+            <span
+              className="inline-block text-[10px] font-bold uppercase tracking-[3px] px-3 py-1 rounded-full border"
+              style={{
+                color: accentColor,
+                borderColor: `${accentColor}55`,
+              }}
+            >
+              ✦ Prism News · {categoryLabel}
+            </span>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Article HTML content — CSS vars per categorie injectate inline */}
-      <div
-        className="editorial-wrapper"
-        data-category={article.category ?? undefined}
-        style={cat ? {
-          "--ed-accent":          cat.accent,
-          "--ed-accent-dark":     cat.accentDark,
-          "--ed-hero-from":       cat.hero[0],
-          "--ed-hero-mid":        cat.hero[1],
-          "--ed-hero-to":         cat.hero[2],
-          "--ed-tips-bg":         cat.tipsBg,
-          "--ed-tips-bg-dark":    cat.tipsBgDark,
-          "--ed-tips-color":      cat.tipsColor,
-          "--ed-tips-color-dark": cat.tipsColorDark,
-        } as React.CSSProperties : undefined}
-        dangerouslySetInnerHTML={{ __html: article.content_html }}
-      />
+        {article.image_url && (
+          <EditorialHero
+            imageUrl={article.image_url}
+            title={article.title}
+            categoryLabel={categoryLabel}
+            accentColor={accentColor}
+            summary={article.summary}
+          />
+        )}
+
+        <EditorialHtmlBody
+          contentHtml={article.content_html}
+          externalHero={Boolean(article.image_url)}
+          className="editorial-wrapper"
+          data-category={article.category ?? undefined}
+          style={cssVars}
+        />
+      </div>
 
       {/* Back footer */}
       <div className="max-w-[780px] mx-auto px-5 pt-2 pb-12 text-center">
@@ -507,7 +507,83 @@ const editorialStyles = `
     background: var(--background);
   }
 
+  /* Hero HTML ascuns când afișăm hero cu imagine din DB */
+  .editorial-wrapper[data-external-hero="true"] .hero {
+    display: none !important;
+  }
+
+  /* Imagini în corpul articolului — lightbox, hover, layout */
+  .editorial-wrapper .article-container img,
+  .editorial-wrapper .expanded-content img {
+    max-width: 100%;
+    height: auto;
+    vertical-align: middle;
+    border-radius: 0.125rem;
+    border: 1px solid var(--card-border);
+    transition: opacity 0.2s ease;
+    cursor: zoom-in;
+  }
+
+  .editorial-wrapper .article-container img:hover,
+  .editorial-wrapper .expanded-content img:hover {
+    opacity: 0.9;
+  }
+
+  .editorial-wrapper figure {
+    margin: 1.25rem 0;
+  }
+
+  .editorial-wrapper figure img {
+    margin-bottom: 0;
+  }
+
+  .editorial-wrapper figcaption {
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    font-size: 0.8125rem;
+    color: var(--muted);
+    font-style: italic;
+    text-align: center;
+    margin-top: 0.5rem;
+    line-height: 1.45;
+  }
+
+  /* Full width — iese din coloana de text (magazine) */
+  .editorial-wrapper img.ed-img-full {
+    display: block;
+    width: calc(100% + 3rem);
+    max-width: none;
+    margin: 1.25rem -1.5rem;
+    border-radius: 0.125rem;
+  }
+
+  @media (min-width: 768px) {
+    .editorial-wrapper img.ed-img-float-left {
+      float: left;
+      width: min(42%, 19rem);
+      margin: 0.35rem 1.25rem 0.85rem 0;
+      shape-outside: margin-box;
+    }
+    .editorial-wrapper img.ed-img-float-right {
+      float: right;
+      width: min(42%, 19rem);
+      margin: 0.35rem 0 0.85rem 1.25rem;
+      shape-outside: margin-box;
+    }
+  }
+
+  .editorial-wrapper .expanded-content::after,
+  .editorial-wrapper .article-container::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
   @media (max-width: 640px) {
+    .editorial-wrapper img.ed-img-full {
+      width: calc(100% + 2rem);
+      margin-left: -1rem;
+      margin-right: -1rem;
+    }
     .editorial-wrapper .hero {
       padding: 2.5rem 1rem 2.25rem;
     }

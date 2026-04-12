@@ -47,7 +47,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
-        <SettingsProvider>{children}</SettingsProvider>
+        <SettingsProvider>
+          <div className="flex-1 flex flex-col min-h-0">{children}</div>
+        </SettingsProvider>
         <CookieConsent />
       </body>
     </html>

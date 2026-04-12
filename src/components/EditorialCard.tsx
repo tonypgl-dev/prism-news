@@ -40,15 +40,27 @@ export function EditorialCard({ article }: Props) {
     [article.content_html]
   );
 
+  const toggleExpanded = () => setIsExpanded((v) => !v);
+
   return (
     <div
-      className={`rounded-sm border transition-all duration-300 overflow-hidden ${
+      tabIndex={0}
+      aria-expanded={isExpanded}
+      aria-label={isExpanded ? "Restrânge cardul editorial" : "Extinde cardul editorial"}
+      className={`rounded-sm border transition-all duration-300 overflow-hidden cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--accent)] ${
         isExpanded ? "bg-slate-50/80 dark:bg-slate-900/45" : ""
       }`}
       style={{
         borderColor: `${accentColor}40`,
         ...(!isExpanded ? { backgroundColor: `${accentColor}06` } : {}),
         ...(isExpanded ? { boxShadow: `inset 0 1px 0 0 ${accentColor}22` } : {}),
+      }}
+      onClick={toggleExpanded}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleExpanded();
+        }
       }}
     >
       <div className="flex gap-0 min-h-[96px]">
@@ -78,20 +90,18 @@ export function EditorialCard({ article }: Props) {
                 </>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setIsExpanded((v) => !v)}
-              aria-expanded={isExpanded}
-              aria-label={isExpanded ? "Restrânge preview-ul" : "Extinde preview-ul"}
-              className="shrink-0 p-1 rounded-sm text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+            <span
+              className="shrink-0 p-1 rounded-sm text-slate-500 pointer-events-none"
+              aria-hidden
             >
               <motion.span
                 animate={{ rotate: isExpanded ? 180 : 0 }}
                 transition={{ duration: 0.25 }}
+                className="inline-flex"
               >
                 <ChevronDown size={18} strokeWidth={2.25} />
               </motion.span>
-            </button>
+            </span>
           </div>
 
           <h3
@@ -145,7 +155,8 @@ export function EditorialCard({ article }: Props) {
 
                   <Link
                     href={`/editorial/${article.id}`}
-                    className="inline-flex w-full sm:w-auto items-center justify-center px-4 py-2.5 rounded-sm text-[11px] font-bold uppercase tracking-widest text-white shadow-sm transition-opacity hover:opacity-90"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex w-full sm:w-auto items-center justify-center px-4 py-2.5 rounded-sm text-[11px] font-bold uppercase tracking-widest text-white shadow-sm transition-opacity hover:opacity-90 cursor-pointer"
                     style={{ backgroundColor: accentColor }}
                   >
                     Citește tot articolul

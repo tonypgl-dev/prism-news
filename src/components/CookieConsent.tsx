@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Shield, BarChart2, SlidersHorizontal, ChevronDown, ChevronUp, X } from "lucide-react";
 
 export type CookieConsentData = {
@@ -113,7 +114,14 @@ export function CookieConsent() {
             <Shield size={16} className="text-slate-900 dark:text-white shrink-0 mt-0.5" />
             <p className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 leading-relaxed">
               Această pagină folosește cookies pentru a-ți oferi o experiență personalizată și pentru
-              a analiza traficul. Poți alege ce tipuri de cookies accepți.{" "}
+              a analiza traficul. Poți alege ce tipuri de cookies accepți. Mai multe detalii în{" "}
+              <Link
+                href="/cookies"
+                className="text-slate-900 dark:text-white underline underline-offset-2 hover:opacity-80 transition-opacity"
+              >
+                Politica de Cookies
+              </Link>
+              .{" "}
               <button
                 type="button"
                 onClick={() => setExpanded((v) => !v)}
