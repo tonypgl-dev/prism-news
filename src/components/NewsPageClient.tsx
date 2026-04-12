@@ -12,7 +12,7 @@ import { isBlindspot } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
 import { FeedFilterPanel } from "./FeedFilterPanel";
 import { SortOrderDropdown, type SortOrder } from "./SortOrderDropdown";
-import { useFeedFilter, dateRangeToIso } from "@/hooks/useFeedFilter";
+import { useFeedFilter, dateRangeToIso, type DateRange } from "@/hooks/useFeedFilter";
 import {
   detectCategory,
   detectRegion,
@@ -27,12 +27,21 @@ interface Props {
   rows: ClusterRow[];
   totalArticles: number;
   initialFrom: string;
+  defaultDateRange?: DateRange;
   biasFilter?: BiasFilter;
   toolbarPrefix?: React.ReactNode;
   featuredClusterId?: string;
 }
 
-export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, biasFilter = "all", toolbarPrefix, featuredClusterId }: Props) {
+export function NewsPageClient({
+  rows: initialRows,
+  totalArticles,
+  initialFrom,
+  defaultDateRange,
+  biasFilter = "all",
+  toolbarPrefix,
+  featuredClusterId,
+}: Props) {
   // Latch: reținem featuredClusterId de la primul render (supraviețuiește URL cleanup)
   const [pinnedClusterId] = useState<string | undefined>(featuredClusterId);
   const [mode, setMode] = useState<ViewMode>("discovery");
@@ -60,15 +69,22 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
   const [hasMore, setHasMore] = useState(true);
   const [currentFrom, setCurrentFrom] = useState(initialFrom);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const skipNextDateRangeSync = useRef(true);
 
   // Resetăm la schimbarea datelor initiale (dateRange schimbat)
   const prevFrom = useRef(initialFrom);
 
-  const feedFilter = useFeedFilter();
+  const feedFilter = useFeedFilter(
+    defaultDateRange ? { defaultDateRange } : undefined
+  );
   const { filter, activeFilterCount } = feedFilter;
 
   // Sync dateRange cu rows (fetch nou când se schimbă intervalul)
   useEffect(() => {
+    if (skipNextDateRangeSync.current) {
+      skipNextDateRangeSync.current = false;
+      return;
+    }
     const newFrom = dateRangeToIso(filter.dateRange);
     if (newFrom === currentFrom) return;
 
@@ -92,9 +108,11 @@ export function NewsPageClient({ rows: initialRows, totalArticles, initialFrom, 
   useEffect(() => {
     if (prevFrom.current !== initialFrom) {
       prevFrom.current = initialFrom;
+      setCurrentFrom(initialFrom);
       setRows(initialRows);
       setLoadedOffset(initialRows.length);
       setHasMore(true);
+      skipNextDateRangeSync.current = true;
     }
   }, [initialRows, initialFrom]);
 

@@ -3,7 +3,15 @@ import { Header } from "@/components/Header";
 import { HomeTagline } from "@/components/HomeTagline";
 import { SpectrumSection } from "@/components/SpectrumSection";
 import { buildClusterRows } from "@/lib/cluster";
-import { fetchLatestArticles, fetchArticlesByClusterId, fetchClusterIdBySlug } from "@/lib/supabase";
+import {
+  fetchLatestArticles,
+  fetchArticlesByClusterId,
+  fetchClusterIdBySlug,
+  fetchEditorialArticles,
+} from "@/lib/supabase";
+import { FEED_FROM_ALL } from "@/lib/feed-from";
+import type { DateRange } from "@/hooks/useFeedFilter";
+import type { ClusterRow } from "@/types";
 import { AlertCircle } from "lucide-react";
 
 // Revalidare ISR: reconstituie pagina din 5 în 5 minute
@@ -118,8 +126,41 @@ export default async function HomePage({ searchParams }: PageProps) {
   const featuredClusterId = featuredParam ? await resolveFeatured(featuredParam) ?? undefined : undefined;
 
   const from24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const articles = await fetchLatestArticles({ limit: 30, offset: 0, from: from24h });
-  let rows = buildClusterRows(articles);
+  const from30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  const [articles24h, editorialArticles] = await Promise.all([
+    fetchLatestArticles({ limit: 30, offset: 0, from: from24h }),
+    fetchEditorialArticles({ limit: 5 }),
+  ]);
+
+  let articles = articles24h;
+  let feedInitialFrom: string = from24h;
+  let feedDefaultDateRange: DateRange | undefined;
+
+  if (articles.length === 0) {
+    articles = await fetchLatestArticles({ limit: 30, offset: 0, from: from30d });
+    if (articles.length > 0) {
+      feedInitialFrom = from30d;
+      feedDefaultDateRange = "30d";
+    }
+  }
+  if (articles.length === 0) {
+    articles = await fetchLatestArticles({ limit: 30 });
+    if (articles.length > 0) {
+      feedInitialFrom = FEED_FROM_ALL;
+      feedDefaultDateRange = "30d";
+    }
+  }
+
+  // Articolele editoriale devin ClusterRows individuale, pinuite primele
+  const editorialRows: ClusterRow[] = editorialArticles.map((a) => ({
+    cluster_id: a.id,
+    left: null,
+    center: a,
+    right: null,
+  }));
+
+  let rows = [...editorialRows, ...buildClusterRows(articles)];
 
   // Dacă vine cu ?featured=..., punem clusterul respectiv primul
   if (featuredClusterId) {
@@ -152,6 +193,7 @@ export default async function HomePage({ searchParams }: PageProps) {
 
       <main className="flex-1 max-w-screen-xl mx-auto w-full px-4 sm:px-6 pt-8 pb-6 sm:pt-12 space-y-6">
         <HomeTagline />
+
         {/* Spectru + feed filtrat */}
         {articles.length === 0 ? (
           <EmptyState />
@@ -159,7 +201,8 @@ export default async function HomePage({ searchParams }: PageProps) {
           <SpectrumSection
             rows={rows}
             totalArticles={articles.length}
-            initialFrom={from24h}
+            initialFrom={feedInitialFrom}
+            defaultDateRange={feedDefaultDateRange}
             featuredClusterId={featuredClusterId}
           />
         )}

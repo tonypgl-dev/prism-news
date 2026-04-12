@@ -19,7 +19,7 @@ export const MOCK_ARTICLES: Article[] = [
     published_at: hoursAgo(2),
     bias: "left",
     cluster_id: "c1",
-    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null,
+    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null, category: null, content_html: null,
     source: { id: "s1", name: "Libertatea", logo_url: null, bias: "left", owner: "Ringier Romania", notable_interests: "Print, Digital, Entertainment", factuality_score: 78, profile_url: "https://mediabiasfactcheck.com/libertatea/" },
   },
   {
@@ -33,7 +33,7 @@ export const MOCK_ARTICLES: Article[] = [
     published_at: hoursAgo(3),
     bias: "center",
     cluster_id: "c1",
-    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null,
+    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null, category: null, content_html: null,
     source: { id: "s2", name: "Digi24", logo_url: null, bias: "center", owner: "RCS & RDS (Digi Communications)", notable_interests: "Telecomunicații, Cablu TV, Internet", factuality_score: 82, profile_url: "https://mediabiasfactcheck.com/digi24/" },
   },
   {
@@ -47,7 +47,7 @@ export const MOCK_ARTICLES: Article[] = [
     published_at: hoursAgo(1),
     bias: "right",
     cluster_id: "c1",
-    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null,
+    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null, category: null, content_html: null,
     source: { id: "s3", name: "G4Media", logo_url: null, bias: "right", owner: "Asociația pentru Jurnalism Independent", notable_interests: "Justiție, Anticorupție, UE", factuality_score: 88, profile_url: "https://mediabiasfactcheck.com/g4media/" },
   },
 
@@ -63,7 +63,7 @@ export const MOCK_ARTICLES: Article[] = [
     published_at: hoursAgo(5),
     bias: "left",
     cluster_id: "c2",
-    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null,
+    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null, category: null, content_html: null,
     source: { id: "s1", name: "Libertatea", logo_url: null, bias: "left", owner: "Ringier Romania", notable_interests: "Print, Digital, Entertainment", factuality_score: 78, profile_url: "https://mediabiasfactcheck.com/libertatea/" },
   },
   {
@@ -77,7 +77,7 @@ export const MOCK_ARTICLES: Article[] = [
     published_at: hoursAgo(4),
     bias: "right",
     cluster_id: "c2",
-    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null,
+    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null, category: null, content_html: null,
     source: { id: "s3", name: "G4Media", logo_url: null, bias: "right", owner: "Asociația pentru Jurnalism Independent", notable_interests: "Justiție, Anticorupție, UE", factuality_score: 88, profile_url: "https://mediabiasfactcheck.com/g4media/" },
   },
 
@@ -93,7 +93,7 @@ export const MOCK_ARTICLES: Article[] = [
     published_at: hoursAgo(6),
     bias: "center",
     cluster_id: "c3",
-    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null,
+    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null, category: null, content_html: null,
     source: { id: "s2", name: "Digi24", logo_url: null, bias: "center", owner: "RCS & RDS (Digi Communications)", notable_interests: "Telecomunicații, Cablu TV, Internet", factuality_score: 82, profile_url: "https://mediabiasfactcheck.com/digi24/" },
   },
   {
@@ -107,7 +107,7 @@ export const MOCK_ARTICLES: Article[] = [
     published_at: hoursAgo(7),
     bias: "right",
     cluster_id: "c3",
-    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null,
+    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null, category: null, content_html: null,
     source: { id: "s3", name: "G4Media", logo_url: null, bias: "right", owner: "Asociația pentru Jurnalism Independent", notable_interests: "Justiție, Anticorupție, UE", factuality_score: 88, profile_url: "https://mediabiasfactcheck.com/g4media/" },
   },
 
@@ -123,7 +123,7 @@ export const MOCK_ARTICLES: Article[] = [
     published_at: hoursAgo(10),
     bias: "left",
     cluster_id: "c4",
-    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null,
+    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null, category: null, content_html: null,
     source: { id: "s1", name: "Libertatea", logo_url: null, bias: "left", owner: "Ringier Romania", notable_interests: "Print, Digital, Entertainment", factuality_score: 78, profile_url: "https://mediabiasfactcheck.com/libertatea/" },
   },
   {
@@ -137,7 +137,7 @@ export const MOCK_ARTICLES: Article[] = [
     published_at: hoursAgo(11),
     bias: "center",
     cluster_id: "c4",
-    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null,
+    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null, category: null, content_html: null,
     source: { id: "s2", name: "Digi24", logo_url: null, bias: "center", owner: "RCS & RDS (Digi Communications)", notable_interests: "Telecomunicații, Cablu TV, Internet", factuality_score: 82, profile_url: "https://mediabiasfactcheck.com/digi24/" },
   },
   {
@@ -151,7 +151,7 @@ export const MOCK_ARTICLES: Article[] = [
     published_at: hoursAgo(12),
     bias: "right",
     cluster_id: "c4",
-    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null,
+    original_snippet: null, ai_pre_summary: null, ai_summary: null, subscription_topic: null, category: null, content_html: null,
     source: { id: "s3", name: "G4Media", logo_url: null, bias: "right", owner: "Asociația pentru Jurnalism Independent", notable_interests: "Justiție, Anticorupție, UE", factuality_score: 88, profile_url: "https://mediabiasfactcheck.com/g4media/" },
   },
 ];

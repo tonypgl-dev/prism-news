@@ -20,3 +20,13 @@
 *   `src/contexts`: Settings, Auth (viitor).
 *   `src/hooks`: useSettings, useFreemium.
 *   `src/lib`: utils.ts (BIAS_COLORS, BIAS_LABELS), supabase.ts.
+
+## 5. Publicare Articole Editoriale
+Pentru a posta un articol editorial original (din HTML furnizat de utilizator),
+urmează instrucțiunile din **`postarestire.md`** — inclusiv categorii, clase HTML
+suportate, scriptul de inserție și fișierele relevante.
+
+## 6. Categorii Editoriale
+Toate categoriile (sluguri, culori, teme editoriale) sunt documentate în **`categorii.md`**.
+Sursa de adevăr pentru cod este **`src/lib/editorial-categories.ts`** — nu duplica
+informația despre categorii în alte fișiere, importă din acest modul.

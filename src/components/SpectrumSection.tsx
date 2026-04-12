@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BiasLegend } from "./BiasLegend";
 import { NewsPageClient } from "./NewsPageClient";
 import type { ClusterRow } from "@/types";
+import type { DateRange } from "@/hooks/useFeedFilter";
 
 export type BiasFilter = "all" | "left" | "center" | "right";
 
@@ -12,6 +13,8 @@ interface Props {
   rows: ClusterRow[];
   totalArticles: number;
   initialFrom: string;
+  /** Aliniat cu fereastra folosită la încărcarea inițială (fallback 30d / arhivă). */
+  defaultDateRange?: DateRange;
   featuredClusterId?: string;
 }
 
@@ -39,7 +42,13 @@ function SpectrumOrb({ onClick, isOpen }: { onClick: () => void; isOpen: boolean
   );
 }
 
-export function SpectrumSection({ rows, totalArticles, initialFrom, featuredClusterId }: Props) {
+export function SpectrumSection({
+  rows,
+  totalArticles,
+  initialFrom,
+  defaultDateRange,
+  featuredClusterId,
+}: Props) {
   const [biasFilter, setBiasFilter] = useState<BiasFilter>("all");
   const [legendOpen, setLegendOpen] = useState(false);
 
@@ -69,6 +78,7 @@ export function SpectrumSection({ rows, totalArticles, initialFrom, featuredClus
         rows={rows}
         totalArticles={totalArticles}
         initialFrom={initialFrom}
+        defaultDateRange={defaultDateRange}
         biasFilter={biasFilter}
         toolbarPrefix={orb}
         featuredClusterId={featuredClusterId}

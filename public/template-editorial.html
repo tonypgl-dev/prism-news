@@ -1,0 +1,97 @@
+<!--
+  ȘABLON ARTICOL EDITORIAL — Prism News
+  ─────────────────────────────────────
+  1. Copiază acest fișier, redenumește-l (ex: public/meu-articol.html).
+  2. Înlocuiește textele [PLACEHOLDER] și șterge secțiunile marcate OPȚIONAL dacă nu le folosești.
+  3. Păstrează clasele CSS de mai jos (nu folosi Tailwind în HTML-ul din DB).
+  4. Conținutul inserat în Supabase = DOAR fragmentul din interiorul <body> al fișierului tău,
+     fără <!DOCTYPE>, <html>, <head>, <style>, <script> — vezi postarestire.md.
+  5. Stilurile sunt definite în editorialStyles din src/app/editorial/[id]/page.tsx.
+-->
+
+  <!-- OPȚIONAL: șterge blocul hero dacă articolul nu folosește hero cu gradient -->
+  <header class="hero">
+    <!-- Pilulă de categorie / etichetă -->
+    <div class="hero-badge">[PLACEHOLDER · Subtitlu scurt]</div>
+    <!-- Titlu principal; folosește <em> pentru cuvinte evidențiate (accent auriu) -->
+    <h1>Titlu editorial <em>cu accent</em> opțional</h1>
+    <p class="hero-subtitle">[PLACEHOLDER — subtitlu scurt, italic, max 2 linii]</p>
+  </header>
+
+  <!-- Separator decorativ între hero și articol -->
+  <div class="ornament">✦ ✦ ✦</div>
+
+  <article class="article-container">
+
+    <!-- Meta: autor, timp citire, dată -->
+    <div class="article-meta">
+      <span>📝 [PLACEHOLDER Autor]</span>
+      <span class="meta-dot"></span>
+      <span>[PLACEHOLDER] min de citit</span>
+      <span class="meta-dot"></span>
+      <span>[PLACEHOLDER] lună an</span>
+    </div>
+
+    <!-- Intro cu drop-cap pe primul paragraf -->
+    <section class="teaser-section">
+      <p>Primul paragraf al intro-ului — primește literă mare decorativă (drop-cap) automat.</p>
+      <p>Al doilea paragraf al intro-ului.</p>
+      <p>Al treilea paragraf (opțional).</p>
+    </section>
+
+    <!-- OPȚIONAL: șterge dacă nu folosești buton „Citește mai departe” pe alte canale — pe site e ascuns -->
+    <div class="read-more-wrapper">
+      <button type="button" class="read-more-btn" tabindex="-1" aria-hidden="true">Citește mai departe</button>
+    </div>
+
+    <!-- Corpul articolului — mereu vizibil pe /editorial/[id] -->
+    <div class="expanded-content">
+
+      <!-- Titlu de secțiune principală -->
+      <h2 class="section-heading">[PLACEHOLDER] Titlu secțiune H2</h2>
+      <p>Paragraf de corp.</p>
+
+      <!-- OPȚIONAL: șterge dacă nu e nevoie -->
+      <h3 class="sub-heading">Subtitlu italic (H3 stilizat)</h3>
+      <p>Aliniat la noul sub-heading.</p>
+
+      <!-- OPȚIONAL: șterge — card „știință” / explicație tehnică -->
+      <div class="science-card">
+        <h4>Etichetă mică caps (ex: Pe limba științei)</h4>
+        <p>Text explicativ. Poți folosi <strong>bold</strong>.</p>
+      </div>
+
+      <!-- OPȚIONAL: șterge — citat / box evidențiat -->
+      <div class="highlight-box">
+        <strong>Lead:</strong> text italic în chenar cu border auriu.
+      </div>
+
+      <!-- OPȚIONAL: șterge — listă numerotată de sfaturi -->
+      <div class="tips-section">
+        <h3>✨ Titlu secțiune sfaturi</h3>
+        <div class="tip-item">
+          <div class="tip-number">1</div>
+          <div class="tip-text"><strong>Scurt titlu.</strong> Text sfat.</div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-number">2</div>
+          <div class="tip-text"><strong>Al doilea sfat.</strong> Descriere.</div>
+        </div>
+      </div>
+
+      <!-- OPȚIONAL: șterge — concluzie în box închis -->
+      <div class="conclusion-section">
+        <h3>Concluzie: titlu</h3>
+        <p>Primul paragraf concluzie.</p>
+        <p class="ed-conclusion-follow">Paragraf următor cu spațiu sus.</p>
+        <p class="ed-conclusion-signoff">Semnătură sau urare finală (italic, accent auriu).</p>
+      </div>
+
+    </div><!-- .expanded-content -->
+
+    <!-- Footer mic copyright / sursă -->
+    <div class="article-footer">
+      © [AN] · [PLACEHOLDER] · Toate drepturile rezervate
+    </div>
+
+  </article>

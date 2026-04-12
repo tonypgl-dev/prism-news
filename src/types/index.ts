@@ -26,6 +26,8 @@ export interface Article {
   ai_pre_summary: string | null;
   ai_summary: string | null;
   subscription_topic: string | null;
+  category: string | null;
+  content_html: string | null;
   source?: Source;
 }
 

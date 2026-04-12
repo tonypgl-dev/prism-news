@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Știința din spatele motivelor pentru care ni se arde pașca pe fund</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,300;1,8..60,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FDF6EC;
+    --warm-white: #FFF9F0;
+    --gold: #C8963E;
+    --gold-light: #E8C97A;
+    --gold-pale: #F5E6C4;
+    --brown-deep: #3A2518;
+    --brown-warm: #5C3D2E;
+    --brown-text: #4A3728;
+    --rose: #C4756E;
+    --rose-light: #E8ADA7;
+    --sage: #8B9E7C;
+    --sage-light: #C5D4B8;
+    --border: #E6D5BF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    color: var(--brown-text);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Hero Section ── */
+  .hero {
+    position: relative;
+    background: linear-gradient(135deg, #3A2518 0%, #5C3D2E 40%, #7A5A48 100%);
+    padding: 80px 24px 60px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(200, 150, 62, 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 30%, rgba(196, 117, 110, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: var(--cream);
+    clip-path: ellipse(55% 100% at 50% 100%);
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    border: 1px solid rgba(200, 150, 62, 0.4);
+    padding: 6px 20px;
+    border-radius: 30px;
+    margin-bottom: 32px;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 700;
+    color: var(--warm-white);
+    line-height: 1.2;
+    max-width: 720px;
+    margin: 0 auto 20px;
+  }
+
+  .hero h1 em {
+    color: var(--gold-light);
+    font-style: italic;
+  }
+
+  .hero-subtitle {
+    font-family: 'Source Serif 4', serif;
+    font-size: 17px;
+    color: rgba(255, 249, 240, 0.7);
+    font-style: italic;
+    max-width: 500px;
+    margin: 0 auto;
+    font-weight: 300;
+  }
+
+  /* ── Decorative Divider ── */
+  .ornament {
+    text-align: center;
+    padding: 28px 0;
+    color: var(--gold);
+    font-size: 20px;
+    letter-spacing: 12px;
+    opacity: 0.6;
+  }
+
+  /* ── Article Container ── */
+  .article-container {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── Meta ── */
+  .article-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px 0 30px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--brown-warm);
+    opacity: 0.7;
+  }
+
+  .article-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .meta-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* ── Teaser Section ── */
+  .teaser-section p {
+    margin-bottom: 20px;
+    font-size: 19px;
+    line-height: 1.8;
+  }
+
+  .teaser-section p:first-child::first-letter {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 68px;
+    float: left;
+    line-height: 0.85;
+    margin: 4px 12px 0 0;
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* ── Read More Button ── */
+  .read-more-wrapper {
+    text-align: center;
+    padding: 40px 0 10px;
+  }
+
+  .read-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--warm-white);
+    background: linear-gradient(135deg, var(--gold) 0%, #B08030 100%);
+    border: none;
+    padding: 16px 40px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    box-shadow: 0 4px 20px rgba(200, 150, 62, 0.3);
+  }
+
+  .read-more-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(200, 150, 62, 0.45);
+  }
+
+  .read-more-btn svg {
+    transition: transform 0.4s ease;
+  }
+
+  .read-more-btn.expanded svg {
+    transform: rotate(180deg);
+  }
+
+  /* ── Expanded Content ── */
+  .expanded-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+    opacity: 0;
+  }
+
+  .expanded-content.visible {
+    max-height: 12000px;
+    opacity: 1;
+  }
+
+  /* ── Section Headings ── */
+  .section-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--brown-deep);
+    margin: 50px 0 20px;
+    position: relative;
+    padding-left: 20px;
+  }
+
+  .section-heading::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 4px;
+    background: linear-gradient(to bottom, var(--gold), var(--rose));
+    border-radius: 2px;
+  }
+
+  .sub-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 21px;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--brown-warm);
+    margin: 35px 0 14px;
+  }
+
+  /* ── Body Text ── */
+  .expanded-content p {
+    margin-bottom: 18px;
+    font-size: 18px;
+    line-height: 1.8;
+  }
+
+  /* ── Highlight Box ── */
+  .highlight-box {
+    background: linear-gradient(135deg, var(--warm-white) 0%, #FFF5E6 100%);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 12px 12px 0;
+    padding: 24px 28px;
+    margin: 30px 0;
+    font-style: italic;
+    color: var(--brown-warm);
+    font-size: 17px;
+    line-height: 1.7;
+    box-shadow: 0 2px 12px rgba(58, 37, 24, 0.06);
+  }
+
+  .highlight-box strong {
+    color: var(--brown-deep);
+    font-style: normal;
+  }
+
+  /* ── Science Card ── */
+  .science-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 30px;
+    margin: 30px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .science-card::before {
+    content: '🔬';
+    position: absolute;
+    top: -8px;
+    right: 16px;
+    font-size: 50px;
+    opacity: 0.08;
+  }
+
+  .science-card h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 10px;
+  }
+
+  .science-card p {
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 8px;
+    color: var(--brown-warm);
+  }
+
+  /* ── Tips Section ── */
+  .tips-section {
+    background: linear-gradient(135deg, #F0F5EB 0%, #E8F0DE 100%);
+    border-radius: 20px;
+    padding: 36px 32px;
+    margin: 40px 0;
+  }
+
+  .tips-section h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #4A6340;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .tip-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(139, 158, 124, 0.2);
+  }
+
+  .tip-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .tip-number {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--sage);
+    color: white;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+
+  .tip-text {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--brown-text);
+  }
+
+  .tip-text strong {
+    color: #4A6340;
+  }
+
+  /* ── Conclusion ── */
+  .conclusion-section {
+    background: linear-gradient(135deg, var(--brown-deep) 0%, #5C3D2E 100%);
+    border-radius: 20px;
+    padding: 40px 36px;
+    margin: 50px 0 20px;
+    color: var(--warm-white);
+  }
+
+  .conclusion-section h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 16px;
+  }
+
+  .conclusion-section p {
+    font-size: 17px;
+    line-height: 1.8;
+    color: rgba(255, 249, 240, 0.85);
+  }
+
+  /* ── Footer ── */
+  .article-footer {
+    text-align: center;
+    padding: 40px 0 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--brown-warm);
+    opacity: 0.5;
+    letter-spacing: 1px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .hero { padding: 60px 20px 50px; }
+    .article-container { padding: 0 18px 60px; }
+    .teaser-section p:first-child::first-letter { font-size: 52px; }
+    .tips-section { padding: 28px 22px; }
+    .conclusion-section { padding: 30px 24px; }
+    .science-card { padding: 22px 20px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ═══ HERO ═══ -->
+  <header class="hero">
+    <div class="hero-badge">Paște · Ediție Specială</div>
+    <h1>Știința din spatele motivelor pentru care ni se <em>arde pașca</em> pe fund</h1>
+    <p class="hero-subtitle">De ce se întâmplă, ce rol joacă brânza și cum poți preveni — explicat simplu, cu drag de gospodină</p>
+  </header>
+
+  <div class="ornament">✦ ✦ ✦</div>
+
+  <!-- ═══ ARTICLE ═══ -->
+  <article class="article-container">
+
+    <div class="article-meta">
+      <span>📝 Redacția Gospodinelor</span>
+      <span class="meta-dot"></span>
+      <span>8 min de citit</span>
+      <span class="meta-dot"></span>
+      <span>Aprilie 2026</span>
+    </div>
+
+    <!-- ── TEASER ── -->
+    <section class="teaser-section">
+      <p>Știm cu toatele povestea: cuptorul e încins, casa miroase dumnezeiește, dar când scoatem tava și întoarcem pașca — fundul e ars, aproape negru, în timp ce miezul abia s-a prins. E frustrant, mai ales când ai pus suflet, brânză bună și ai urmat rețeta mamei pas cu pas. Dar problema nu ești tu, draga noastră. Problema e fizica și chimia din compoziția pășcii, care fac din ea unul dintre cele mai dificile preparate de copt uniform.</p>
+
+      <p>Pe scurt, pașca este un amestec foarte bogat în apă (brânza de vaci conține 70–80% apă), iar această umezeală face ca miezul să se încălzească extrem de lent. Apa absoarbe enorm de multă căldură înainte să-și crească temperatura — e aceeași proprietate care face ca o oală cu apă să fie greu de fiert. Între timp, fundul, aflat cel mai aproape de sursa de căldură, se usucă și se supraîncălzește rapid, trecând de 150–160 °C (temperatura la care zahărul și proteinele se caramelizează și apoi se carbonizează), în timp ce miezul abia ajunge la 80–90 °C. Rezultatul? Un fund ars și un interior care pare încă crud.</p>
+
+      <p>Dacă vrei să înțelegi în detaliu de ce se întâmplă asta — ce face brânza, ouăle și grăsimea din punct de vedere științific, și mai ales cum poți preveni problema — citește mai departe. Ți-am pregătit explicația completă, pe înțelesul tuturor.</p>
+    </section>
+
+    <!-- ── READ MORE BUTTON ── -->
+    <div class="read-more-wrapper">
+      <button class="read-more-btn" id="readMoreBtn" onclick="toggleContent()">
+        Citește mai departe
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+
+    <!-- ── EXPANDED CONTENT ── -->
+    <div class="expanded-content" id="expandedContent">
+
+      <h2 class="section-heading">1. Apa — dușmanul invizibil al coacerii uniforme</h2>
+
+      <p>Primul lucru pe care trebuie să-l înțelegem e cât de apoasă este, de fapt, compoziția pășcii. Brânza de vaci — ingredientul principal — este formată în proporție de 70–80% din apă. Adaugă ouăle (care și ele sunt aproximativ 75% apă) și obții un aluat care este, în esență, mai mult lichid decât solid.</p>
+
+      <p>Acum vine partea interesantă din punct de vedere fizic: apa are ceea ce oamenii de știință numesc <strong>căldură specifică mare</strong>. Asta înseamnă că are nevoie de foarte multă energie termică pentru a-și ridica temperatura cu fiecare grad. Concret, pentru a încălzi un gram de apă cu un singur grad Celsius ai nevoie de 4,18 jouli de energie — de aproape două ori mai mult decât pentru ulei și de cinci ori mai mult decât pentru făină uscată.</p>
+
+      <div class="science-card">
+        <h4>Pe limba științei</h4>
+        <p>Cât timp apa din compoziție nu a ajuns la temperatura de fierbere (100 °C), ea funcționează ca un <strong>absorbant termic</strong>: „bea" căldura din cuptor fără ca miezul să se coacă cu adevărat. Practic, interiorul pășcii stă blocat în jurul a 100 °C pentru o perioadă lungă, timp în care apa se evaporă încet. Fundul, însă, aflat direct lângă sursa de căldură, depășește rapid 160–180 °C — temperaturi la care au loc reacțiile de brunificare și, ulterior, de carbonizare.</p>
+      </div>
+
+      <p>De aceea, la pâine sau cozonac, unde conținutul de apă e mult mai mic (35–40%), coacerea e mult mai rapidă și mai uniformă. Pașca, prin natura ei, este un preparat „ud", iar acest lucru îi încetinește dramatic coacerea din interior.</p>
+
+      <h2 class="section-heading">2. Proteinele — o plasă care ține apa captivă</h2>
+
+      <p>La pâine sau cozonac, structura finală este dată de <strong>gluten</strong> — acea rețea elastică formată din proteinele din făină. Glutenul creează o structură poroasă, plină de bule de aer, prin care căldura circulă relativ ușor.</p>
+
+      <p>Pașca, în schimb, are foarte puțin sau deloc gluten. Structura ei se bazează pe cu totul alte proteine: <strong>cazeina</strong> din brânză și <strong>ovalbumina</strong> din albuș. Aceste proteine au un comportament diferit: când sunt încălzite, ele coagulează (se „încheg") și formează un gel dens, compact, fără pori.</p>
+
+      <div class="highlight-box">
+        <strong>Imaginează-ți diferența așa:</strong> pâinea este ca un burete — plină de găurele prin care căldura trece ușor. Pașca este ca o budincă — un bloc solid, fără canale de aer, prin care căldura trebuie să se strecoare milimetru cu milimetru, prin conducție directă, ca prin zid.
+      </div>
+
+      <p>Și mai este un aspect important: atunci când proteinele din ouă coagulează (între 62 și 80 °C), ele formează o rețea microscopică care <strong>captează apa</strong> în interiorul ei, ca o plasă extrem de fină. Asta face ca apa să fie și mai greu de evaporat, prelungind și mai mult timpul de coacere a miezului.</p>
+
+      <h2 class="section-heading">3. Grăsimea — izolantul termic pe care nu-l bănuiai</h2>
+
+      <p>Smântâna, untul, gălbenușurile — toate adaugă un conținut generos de grăsime în compoziția pășcii. Grăsimea e delicioasă, dar are o proprietate mai puțin dorită în cuptor: este un <strong>izolant termic excelent</strong>.</p>
+
+      <p>Grăsimea transmite căldura mult mai lent decât apa și mult, mult mai lent decât metalul tăvii. Practic, stratul de grăsime din compoziție funcționează ca o „pătură termică" în jurul miezului, încetinind și mai mult pătrunderea căldurii spre centru.</p>
+
+      <div class="science-card">
+        <h4>De ce contează asta</h4>
+        <p>Combinația apă + proteine + grăsime creează o „furtună perfectă" din punct de vedere termic: apa absoarbe căldura, proteinele o blochează, iar grăsimea încetinește transferul. Miezul rămâne rece mult mai mult decât ne-am aștepta, iar fundul — care pierde rapid umiditatea și nu mai e protejat — ajunge la temperaturi de carbonizare.</p>
+      </div>
+
+      <h2 class="section-heading">4. Zahărul — acceleratorul brunificării</h2>
+
+      <p>Zahărul din compoziție joacă și el un rol important. La temperaturi de peste 150–160 °C, zahărul trece prin procesul de <strong>caramelizare</strong>, iar în combinație cu proteinele are loc <strong>reacția Maillard</strong> — aceeași reacție care dă culoare aurie fripturii sau crustei de pâine.</p>
+
+      <p>Problema e că fundul pășcii ajunge la aceste temperaturi cu mult înainte ca miezul să fie gata. Și dacă depășim pragul de caramelizare, urmează carbonizarea — acel gust amar, de ars, pe care îl cunoaștem cu toatele prea bine.</p>
+
+      <!-- ═══ SFATURI ═══ -->
+      <div class="tips-section">
+        <h3>✨ 7 secrete pentru pașca perfectă</h3>
+
+        <div class="tip-item">
+          <div class="tip-number">1</div>
+          <div class="tip-text"><strong>Scurge bine brânza.</strong> Cu cât elimini mai multă apă din brânza de vaci înainte de preparare (lasă-o într-un tifon peste noapte), cu atât pașca se va coace mai uniform și mai repede.</div>
+        </div>
+
+        <div class="tip-item">
+          <div class="tip-number">2</div>
+          <div class="tip-text"><strong>Folosește bain-marie.</strong> Pune forma de pașcă într-o tavă mai mare cu apă fierbinte (2–3 cm). Apa din bain-marie nu depășește niciodată 100 °C, ceea ce protejează fundul de supraîncălzire.</div>
+        </div>
+
+        <div class="tip-item">
+          <div class="tip-number">3</div>
+          <div class="tip-text"><strong>Coace la temperatură mai mică, mai mult timp.</strong> 150–160 °C în loc de 180–200 °C. Durează mai mult, dar căldura ajunge uniform în interior fără să ardă exteriorul.</div>
+        </div>
+
+        <div class="tip-item">
+          <div class="tip-number">4</div>
+          <div class="tip-text"><strong>Plasează tava în mijlocul cuptorului.</strong> Nu pe grătarul de jos, unde este cel mai aproape de rezistența inferioară. Dacă tot se brunifică prea repede, pune o tavă goală dedesubt ca scut termic.</div>
+        </div>
+
+        <div class="tip-item">
+          <div class="tip-number">5</div>
+          <div class="tip-text"><strong>Alege forma potrivită.</strong> Formele din sticlă termorezistentă sau ceramică transmit căldura mai lent și mai uniform decât cele din metal. Formele de culoare deschisă reflectă mai multă căldură decât cele închise.</div>
+        </div>
+
+        <div class="tip-item">
+          <div class="tip-number">6</div>
+          <div class="tip-text"><strong>Nu deschide cuptorul în primul sfert din coacere.</strong> Fiecare deschidere scade temperatura cu 20–30 °C, prelungind timpul de coacere și creând diferențe și mai mari între fund și miezul care abia a început să prindă structură.</div>
+        </div>
+
+        <div class="tip-item">
+          <div class="tip-number">7</div>
+          <div class="tip-text"><strong>Testul scobitoarei — dar cu răbdare.</strong> Introdu o scobitoare în centrul pășcii. Dacă iese curată, e gata. Dacă iese umedă, mai lasă, chiar dacă deasupra pare aurie. Acoperă-o cu folie de aluminiu ca să nu se ardă sus în timp ce miezul se termină de copt.</div>
+        </div>
+      </div>
+
+      <!-- ═══ CONCLUZIE ═══ -->
+      <div class="conclusion-section">
+        <h3>Concluzie: nu ești tu de vină, e fizica!</h3>
+        <p>Data viitoare când pașca ta se arde pe fund, să știi că nu e vorba de mâna ta de gospodină. E vorba de un amestec bogat în apă care se încălzește greu, de proteine care blochează evaporarea, de grăsime care izolează miezul și de zahăr care se caramelizează prea repede pe fundul fierbinte al tăvii.</p>
+        <p style="margin-top: 14px;">Acum că știi ce se întâmplă în cuptorul tău la nivel molecular, ai toate armele necesare: scurge brânza, coace la temperatură blândă, folosește bain-marie și alege forma potrivită. Cu puțină răbdare și cu știința de partea ta, pașca perfectă — aurie deasupra, cremoasă la interior, intactă pe fund — nu mai e un vis, ci o certitudine.</p>
+        <p style="margin-top: 14px; color: var(--gold-light); font-style: italic;">Paște fericit și coacere cu spor! 🥚</p>
+      </div>
+
+    </div><!-- end expanded-content -->
+
+    <div class="article-footer">
+      © 2026 · Revista Gospodinelor · Toate drepturile rezervate
+    </div>
+
+  </article>
+
+  <script>
+    function toggleContent() {
+      const content = document.getElementById('expandedContent');
+      const btn = document.getElementById('readMoreBtn');
+      const isExpanded = content.classList.contains('visible');
+
+      if (isExpanded) {
+        content.classList.remove('visible');
+        btn.classList.remove('expanded');
+        btn.innerHTML = 'Citește mai departe <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+        btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        content.classList.add('visible');
+        btn.classList.add('expanded');
+        btn.innerHTML = 'Restrânge articolul <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+        setTimeout(() => {
+          content.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  </script>
+
+</body>
+</html>

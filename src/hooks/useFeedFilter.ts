@@ -35,16 +35,19 @@ interface FeedFilterState {
   dateRange: DateRange;
 }
 
-const DEFAULT_STATE: FeedFilterState = {
-  categories: [...ALL_CATEGORY_KEYS],
-  regions: [...ALL_REGION_KEYS],
-  dateRange: "24h",
-};
+function makeDefaultState(dateRange: DateRange): FeedFilterState {
+  return {
+    categories: [...ALL_CATEGORY_KEYS],
+    regions: [...ALL_REGION_KEYS],
+    dateRange,
+  };
+}
 
 export type FeedFilterHook = ReturnType<typeof useFeedFilter>;
 
-export function useFeedFilter() {
-  const [filter, setFilter] = useState<FeedFilterState>(DEFAULT_STATE);
+export function useFeedFilter(options?: { defaultDateRange?: DateRange }) {
+  const initialRange = options?.defaultDateRange ?? "24h";
+  const [filter, setFilter] = useState<FeedFilterState>(() => makeDefaultState(initialRange));
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Citim din localStorage după mount (SSR safe)
@@ -56,7 +59,7 @@ export function useFeedFilter() {
         setFilter({
           categories: parsed.categories ?? [...ALL_CATEGORY_KEYS],
           regions: parsed.regions ?? [...ALL_REGION_KEYS],
-          dateRange: parsed.dateRange ?? "24h",
+          dateRange: parsed.dateRange ?? initialRange,
         });
       }
     } catch {

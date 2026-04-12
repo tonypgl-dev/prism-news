@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Article } from "@/types";
+import { FEED_FROM_ALL } from "@/lib/feed-from";
 
 // ----------------------------------------------------------------
 // Tipuri Supabase (reflectă schema.sql)
@@ -31,6 +32,8 @@ type SupabaseArticle = {
   ai_pre_summary: string | null;
   ai_summary: string | null;
   subscription_topic: string | null;
+  category: string | null;
+  content_html: string | null;
   // Supabase returnează join-ul ca array; primul element = sursa articolului
   sources: SupabaseSource[] | null;
 };
@@ -65,6 +68,7 @@ const ARTICLE_SELECT = `
   id, source_id, title, summary, link, image_url,
   published_at, bias, cluster_id, original_snippet,
   ai_pre_summary, ai_summary, subscription_topic,
+  category, content_html,
   sources (
     id, name, logo_url, bias, owner,
     notable_interests, factuality_score, profile_url
@@ -87,6 +91,8 @@ function mapRow(row: SupabaseArticle): Article {
     ai_pre_summary: row.ai_pre_summary,
     ai_summary: row.ai_summary,
     subscription_topic: row.subscription_topic,
+    category: row.category ?? null,
+    content_html: row.content_html ?? null,
     source: src
       ? {
           id: src.id,
@@ -151,14 +157,16 @@ export async function fetchLatestArticles(
 export async function fetchArticlesPaginated(opts: {
   limit: number;
   offset: number;
-  from: string;
+  /** ISO sau `all` — fără filtru temporal când lipsește sau e `all`. */
+  from?: string;
 }): Promise<{ articles: Article[]; total: number }> {
   const supabase = createServerClient();
 
-  const { data, error, count } = await supabase
-    .from("articles")
-    .select(ARTICLE_SELECT, { count: "exact" })
-    .gte("published_at", opts.from)
+  const lower = opts.from && opts.from !== FEED_FROM_ALL ? opts.from : null;
+
+  let q = supabase.from("articles").select(ARTICLE_SELECT, { count: "exact" });
+  if (lower) q = q.gte("published_at", lower);
+  const { data, error, count } = await q
     .order("published_at", { ascending: false })
     .range(opts.offset, opts.offset + opts.limit - 1);
 
@@ -303,4 +311,46 @@ export async function searchArticlesCount(opts: {
 
   return (data as number) ?? 0;
 }
+
+// ----------------------------------------------------------------
+// Articole editoriale Prism News (content_html IS NOT NULL)
+// ----------------------------------------------------------------
+
+export async function fetchEditorialArticles(opts: { limit?: number } = {}): Promise<Article[]> {
+  const supabase = createServerClient();
+  const { limit = 10 } = opts;
+
+  const { data, error } = await supabase
+    .from("articles")
+    .select(ARTICLE_SELECT)
+    .not("content_html", "is", null)
+    .order("published_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("[supabase] fetchEditorialArticles:", error.message);
+    return [];
+  }
+
+  return (data as unknown as SupabaseArticle[]).map(mapRow);
+}
+
+export async function fetchEditorialArticleById(id: string): Promise<Article | null> {
+  const supabase = createServerClient();
+
+  const { data, error } = await supabase
+    .from("articles")
+    .select(ARTICLE_SELECT)
+    .eq("id", id)
+    .not("content_html", "is", null)
+    .single();
+
+  if (error) {
+    console.error("[supabase] fetchEditorialArticleById:", error.message);
+    return null;
+  }
+
+  return mapRow(data as unknown as SupabaseArticle);
+}
+
 

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Clock, ImageOff, Lock, Zap, Newspaper, Bell, X, Link2, Check } from "lucide-react";
+import { ExternalLink, Clock, ImageOff, Lock, Zap, Newspaper, Bell, X, Link2, Check, ArrowRight } from "lucide-react";
 import type { Article, ClusterRow, Bias } from "@/types";
 import { timeAgo, BIAS_COLORS, titleToFeaturedSlug } from "@/lib/utils";
 import { useSettings } from "@/hooks/useSettings";
@@ -46,6 +47,13 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
   const { biasLabels, settings } = useSettings();
   const { showBiasLabels, titleFont } = settings;
   const { isPremium } = useFreemium();
+  const router = useRouter();
+
+  // Articol editorial Prism News — are conținut HTML propriu
+  const isEditorial = Boolean(article.content_html);
+  function handleEditorialClick() {
+    router.push(`/editorial/${article.id}`);
+  }
 
   // ── Swipe-to-switch perspective ───────────────────────────────────
   const [activeBias, setActiveBias] = useState<Bias>(article.bias);
@@ -113,7 +121,8 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
     activeArticle.ai_pre_summary?.trim() ||
     "";
   const hasAiContent = hasAiSummary || Boolean(activeArticle.original_snippet);
-  const isCardExpandable = hasAiContent;
+  // Articolele editoriale nu se expandează — duc direct la pagina lor
+  const isCardExpandable = !isEditorial && hasAiContent;
 
   const thumbSourceBadgeBase = `
     absolute z-[5] left-1 flex max-w-[min(calc(100%-0.5rem),9rem)] items-center rounded-t-sm rounded-br-sm
@@ -127,7 +136,7 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
       {/* ── Card principal ──────────────────────────────────────────── */}
       <article
         ref={articleRef}
-        onClick={isCardExpandable ? onToggle : undefined}
+        onClick={isEditorial ? handleEditorialClick : isCardExpandable ? onToggle : undefined}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         className={`
@@ -136,7 +145,7 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
           hover:border-slate-400 dark:hover:border-slate-600
           transition-colors duration-200
           ${isExpanded ? "ring-2 ring-slate-900 dark:ring-white" : ""}
-          ${isCardExpandable ? "cursor-pointer" : ""}
+          ${isEditorial || isCardExpandable ? "cursor-pointer" : ""}
         `}
       >
         {/* ── Row superior: thumbnail + body ──────────────────────── */}
@@ -146,7 +155,9 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
             className="relative shrink-0 w-32 sm:w-44 bg-gray-100 dark:bg-gray-900 overflow-hidden border-r border-gray-100 dark:border-gray-800"
             onClick={(e) => {
               e.stopPropagation();
-              if (isExpanded) {
+              if (isEditorial) {
+                router.push(`/editorial/${article.id}`);
+              } else if (isExpanded) {
                 window.open(activeArticle.link, "_blank", "noopener,noreferrer");
               } else if (isCardExpandable) {
                 onToggle();
@@ -178,8 +189,12 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
               </motion.div>
             </AnimatePresence>
 
-            {/* Nume sursă pe thumbnail — mereu; link + icon extern doar când cardul e deschis */}
-            {isExpanded ? (
+            {/* Badge sursă pe thumbnail */}
+            {isEditorial ? (
+              <span className={`${thumbSourceBadgeBase} pointer-events-none`} aria-hidden>
+                <span className="min-w-0 truncate text-amber-300">✦ Prism News</span>
+              </span>
+            ) : isExpanded ? (
               <a
                 href={activeArticle.link}
                 target="_blank"
@@ -308,7 +323,11 @@ export function FeedCard({ article, row, index, isExpanded, onToggle }: Props) {
                   }}
                 />
 
-                {isCardExpandable && (
+                {isEditorial ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-500">
+                    Citește <ArrowRight size={10} />
+                  </span>
+                ) : isCardExpandable && (
                   <button
                     onClick={(e) => { e.stopPropagation(); onToggle(); }}
                     className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-white pb-0.5"

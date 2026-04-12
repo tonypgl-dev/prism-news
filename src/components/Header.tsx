@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSettings } from "@/hooks/useSettings";
 import { SlidersHorizontal, Mail, X, Send, Search } from "lucide-react";
@@ -16,6 +17,8 @@ interface HeaderProps {
   tickerItems?: string[];
   /** Dată afișată în bara de jos a navbar-ului (ex. ro-RO). */
   dateLabel?: string;
+  /** Implicit true. Setează false pe paginile editoriale unde navbar-ul nu trebuie sticky. */
+  sticky?: boolean;
 }
 
 // ── Modal Contact ─────────────────────────────────────────────────────────────
@@ -162,8 +165,10 @@ const LOGO_PLAIN_MS = 220;
 const LOGO_BEAM_ANIM_MS = 60 + 880;
 const LOGO_BEAM_END_BUFFER_MS = 45;
 
-export function Header({ tickerItems, dateLabel }: HeaderProps) {
+export function Header({ tickerItems, dateLabel, sticky = true }: HeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isHome = pathname === "/";
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -232,19 +237,28 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
   return (
     <>
       <header
-        className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 overflow-visible
+        className={`${sticky ? "sticky top-0 z-50" : "relative"} w-full border-b border-gray-200 dark:border-gray-800 overflow-visible
           bg-gradient-to-r from-slate-600 from-0% via-slate-300 via-[26%] to-white to-[62%]
-          dark:bg-gray-950 dark:bg-none"
+          dark:bg-gray-950 dark:bg-none`}
       >
         <div className="max-w-screen-xl mx-auto px-4">
         <div className="relative flex flex-col py-2 md:py-0 md:h-32 overflow-visible">
         <div className="relative flex flex-1 items-stretch justify-between gap-3 md:gap-4 min-h-0 overflow-visible">
           
           {/* Logo & Brand — secvență: logo simplu → fascicul conic → efecte raze (flare) */}
-          <a
+          <Link
             href="/"
+            prefetch
             className="relative shrink-0 inline-block logo-scale-mobile isolate max-sm:-ml-[30px] self-center md:[transform:translate3d(0,0,0)]"
-            onClick={(e) => { e.preventDefault(); runLogoLightSequence(); router.refresh(); }}
+            onClick={(e) => {
+              e.preventDefault();
+              if (isHome) {
+                runLogoLightSequence();
+                router.refresh();
+              } else {
+                router.push("/");
+              }
+            }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logomod.png" alt="Prisma News" style={{ height: "100px", width: "auto", display: "block" }} />
@@ -377,7 +391,7 @@ export function Header({ tickerItems, dateLabel }: HeaderProps) {
                 </span>
               </div>
             </div>
-          </a>
+          </Link>
 
           {/* Dreapta: acțiuni sus, dată jos în același colț */}
           <div className="ml-auto flex min-w-0 flex-col items-end justify-between gap-2 shrink-0 py-0.5 md:py-3 self-stretch">
